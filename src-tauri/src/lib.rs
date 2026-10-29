@@ -1,4 +1,5 @@
 mod fs;
+mod preview;
 mod search;
 mod state;
 mod terminal;
@@ -12,6 +13,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(terminal::TerminalState::default())
         .manage(watcher::WatcherState::default())
+        .manage(preview::PreviewState::default())
         .invoke_handler(tauri::generate_handler![
             fs::fs_read_dir,
             fs::fs_stat,
@@ -38,6 +40,8 @@ pub fn run() {
             terminal::terminal_kill,
             watcher::watch_start,
             watcher::watch_stop,
+            preview::preview_start,
+            preview::open_external,
         ])
         .build(tauri::generate_context!())
         .expect("error while building Stride");

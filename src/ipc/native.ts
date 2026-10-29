@@ -133,3 +133,9 @@ export const watcher = {
   start: (root: string) => invoke<void>("watch_start", { root }),
   stop: () => invoke<void>("watch_stop"),
 };
+
+export const preview = {
+  /** Starts (or re-roots) the local live-preview server; returns its port. */
+  start: (root: string) => invoke<number>("preview_start", { root }),
+  openExternal: (target: string) => invoke<void>("open_external", { target }),
+};

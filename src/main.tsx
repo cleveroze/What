@@ -23,11 +23,10 @@ import { initThemeEngine } from "./theme/engine";
 async function restoreSession(lastRoot: string | null) {
   const launch = await fs.launchPaths().catch(() => [] as string[]);
   if (launch.length) {
-    for (const p of launch) {
-      const st = await fs.stat(p);
-      if (st.isDir) await openFolder(p, { skipConfirm: true });
-      else await openFile(p, { focus: true });
-    }
+    // Folders first: opening a folder replaces the open editors.
+    const stats = await Promise.all(launch.map(async (p) => ({ p, dir: (await fs.stat(p)).isDir })));
+    for (const { p } of stats.filter((x) => x.dir)) await openFolder(p, { skipConfirm: true });
+    for (const { p } of stats.filter((x) => !x.dir)) await openFile(p, { focus: true });
     return;
   }
   if (lastRoot && getSetting("workbench.restoreWorkspace")) {

@@ -4,6 +4,7 @@ import { editorStore } from "../../state/editors";
 import { settingsStore } from "../../state/settings";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { EditorHost } from "./EditorHost";
+import { PreviewPane } from "./PreviewPane";
 import { Tabs } from "./Tabs";
 import { Welcome } from "./Welcome";
 
@@ -27,6 +28,7 @@ export function EditorArea() {
         )}
         {!hasTabs && showWelcome && <Welcome />}
         {!hasTabs && !showWelcome && <div className="editor-empty" />}
+        {kind === "doc" && <PreviewPane />}
       </div>
     </section>
   );

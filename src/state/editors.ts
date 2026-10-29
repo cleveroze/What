@@ -4,6 +4,7 @@ import { fs, type Encoding, type Eol } from "../ipc/native";
 import { basename, dirname, isWithin, rebase, samePath } from "../lib/path";
 import { createStore } from "../lib/store";
 import { errorMessage, isWindows, uid } from "../lib/util";
+import { detectLanguage } from "../lib/detectLanguage";
 import { log } from "./output";
 import { completeStep } from "./progress";
 import { getSetting, settingsStore } from "./settings";
@@ -72,6 +73,29 @@ interface DocRuntime {
 }
 
 const runtime = new Map<string, DocRuntime>();
+/** Documents whose language the user picked by hand (never auto-detected). */
+const languageLocked = new Set<string>();
+const detectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+/** Untitled files have no extension, so guess the language from content. */
+function scheduleDetect(docId: string) {
+  const doc = editorStore.get().docs[docId];
+  if (!doc || doc.path || languageLocked.has(docId)) return;
+  clearTimeout(detectTimers.get(docId));
+  detectTimers.set(
+    docId,
+    setTimeout(() => {
+      const d = editorStore.get().docs[docId];
+      const model = runtime.get(docId)?.model;
+      if (!d || d.path || !model || languageLocked.has(docId)) return;
+      const lang = detectLanguage(model.getValue());
+      if (lang && lang !== d.language) {
+        monaco.editor.setModelLanguage(model, lang);
+        patchDoc(docId, { language: lang });
+      }
+    }, 350),
+  );
+}
 const closedStack: string[] = [];
 let untitledCounter = 0;
 let activeEditor: monaco.editor.IStandaloneCodeEditor | null = null;
@@ -152,6 +176,7 @@ function attachModel(docId: string, model: monaco.editor.ITextModel, savedVersio
     if (!rt) return;
     patchDoc(docId, { dirty: computeDirty(rt) });
     scheduleAutoSave(docId);
+    scheduleDetect(docId);
   });
   runtime.set(docId, { model, savedVersion, encodingChanged: false, viewState, listener });
 }
@@ -356,7 +381,10 @@ export async function saveDoc(docId: string, opts: { saveAs?: boolean; silent?: 
   let path = doc.path;
   if (!path || opts.saveAs) {
     const root = workspaceStore.get().root;
-    const suggested = doc.path ?? (root ? `${root}${root.includes("\\") ? "\\" : "/"}${doc.name}` : doc.name);
+    // Suggest an extension matching the (detected) language, e.g. Untitled-1.py.
+    const ext = doc.path ? "" : monaco.languages.getLanguages().find((l) => l.id === doc.language)?.extensions?.[0] ?? ".txt";
+    const fileName = doc.path ? doc.name : doc.name + ext;
+    const suggested = doc.path ?? (root ? `${root}${root.includes("\\") ? "\\" : "/"}${fileName}` : fileName);
     const chosen = await saveDialog({ defaultPath: suggested, title: opts.saveAs ? "Save As" : "Save" });
     if (!chosen) return false;
     path = chosen;
@@ -393,7 +421,8 @@ export async function saveDoc(docId: string, opts: { saveAs?: boolean; silent?: 
     const pathChanged = !doc.path || !samePath(doc.path, path);
     if (pathChanged) {
       const name = basename(path);
-      const language = doc.path ? doc.language : languageForPath(path);
+      const byPath = languageForPath(path);
+      const language = doc.path || byPath === "plaintext" ? doc.language : byPath;
       replaceModel(docId, path, name, language);
       patchDoc(docId, { path, name, language });
     }
@@ -604,6 +633,7 @@ export function setDocLanguage(docId: string, language: string) {
   const model = getModel(docId);
   if (!model) return;
   monaco.editor.setModelLanguage(model, language);
+  languageLocked.add(docId);
   patchDoc(docId, { language });
 }
 

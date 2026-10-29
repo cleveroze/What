@@ -171,6 +171,12 @@ function buildMenus(): { id: string; label: string; mnemonic: string; items: () 
       ],
     },
     {
+      id: "run",
+      label: "Run",
+      mnemonic: "r",
+      items: () => [cmd("run.file"), "separator", cmd("run.preview"), cmd("run.openInBrowser"), cmd("run.closePreview")],
+    },
+    {
       id: "terminal",
       label: "Terminal",
       mnemonic: "t",
@@ -260,7 +266,7 @@ export function TitleBar() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
+      if (e.defaultPrevented || !e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
       const letter = e.code.startsWith("Key") ? e.code.slice(3).toLowerCase() : "";
       const idx = menus.findIndex((m) => m.mnemonic === letter);
       if (idx >= 0) {

@@ -283,3 +283,37 @@ settingsStore.subscribe(() => {
     fitTerminal(id);
   });
 });
+
+export type ShellKind = "ps" | "cmd" | "sh";
+
+export function shellKind(shell: ShellInfo): ShellKind {
+  if (shell.id === "powershell" || shell.id === "pwsh") return "ps";
+  if (shell.id === "cmd") return "cmd";
+  return "sh";
+}
+
+/** Runs a command line in the active terminal (creating one if needed),
+ * waiting until its shell process is actually up. */
+export async function runInTerminal(build: (kind: ShellKind) => string, cwd: string | null) {
+  let session = terminalStore.get().sessions.find((s) => s.id === terminalStore.get().activeId && !s.exited);
+  if (!session) {
+    await createTerminal(undefined, cwd, false);
+    session = terminalStore.get().sessions.find((s) => s.id === terminalStore.get().activeId);
+  }
+  if (!session) return;
+  // Keep keyboard focus in the editor so the user can tweak and re-run.
+  showPanel("terminal");
+  const id = session.id;
+  for (let i = 0; i < 80; i++) {
+    const s = getSession(id);
+    if (!s || s.exited) return;
+    if (s.ptyId !== null) {
+      // Give a freshly started shell a moment to print its prompt.
+      if (i > 0) await new Promise((r) => setTimeout(r, 400));
+      await nativeTerminal.write(s.ptyId, build(shellKind(s.shell)) + "\r");
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  reportError("Terminal did not start", "The shell took too long to start, so the command was not sent.");
+}

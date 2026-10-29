@@ -104,7 +104,7 @@ function inTerminal(target: EventTarget | null) {
 
 /** Workbench commands that still work while the terminal has focus; every
  * other key goes to the shell (so e.g. Ctrl+R reaches its history search). */
-const TERMINAL_COMMANDS = /^(terminal\.|workbench\.(commandPalette|quickOpen)|view\.(toggle(Panel|Sidebar)|nextEditor|prevEditor|fullscreen|zoom|maximizePanel)|settings\.open$)/;
+const TERMINAL_COMMANDS = /^(terminal\.|run\.file$|file\.(newFile|open|openFolder|save|saveAll)$|workbench\.(commandPalette|quickOpen)|view\.(toggle(Panel|Sidebar)|nextEditor|prevEditor|fullscreen|zoom|maximizePanel)|settings\.open$)/;
 
 function onKeyDown(e: KeyboardEvent) {
   if (keybindingStore.get().recording || e.isComposing || dialogStore.get().dialog || onboardingStore.get().open || !getSetting("workbench.onboarded")) return;
@@ -142,7 +142,7 @@ function onKeyDown(e: KeyboardEvent) {
   }
   // Block WebView accelerators that would break the desktop illusion
   // (print, reload, browser find) when nothing else handles them.
-  if (!inMonaco(e.target) && !terminal && ["ctrl+p", "ctrl+r", "f5", "ctrl+shift+r", "ctrl+f", "ctrl+g", "ctrl+u"].includes(chord)) {
+  if (!inMonaco(e.target) && !terminal && ["ctrl+p", "ctrl+r", "ctrl+shift+r", "ctrl+f", "ctrl+g", "ctrl+u"].includes(chord)) {
     e.preventDefault();
   }
 }

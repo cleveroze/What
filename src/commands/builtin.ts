@@ -27,6 +27,7 @@ import {
   setDocLanguage,
 } from "../state/editors";
 import { requestExit } from "../state/lifecycle";
+import { closePreview, openInBrowser, openPreview, runActiveFile } from "../state/run";
 import { clearOutput } from "../state/output";
 import { getSetting, setSetting, type Density, type ThemeMode } from "../state/settings";
 import {
@@ -532,6 +533,22 @@ export function registerBuiltinCommands() {
     { id: "editor.changeEncoding", title: "Change File Encoding…", category: "Editor", run: changeEncoding },
     { id: "editor.changeEol", title: "Change End of Line Sequence…", category: "Editor", run: changeEol },
     { id: "editor.changeIndentation", title: "Change Indentation…", category: "Editor", run: changeIndentation },
+
+    // ----- Run -----
+    { id: "run.file", title: "Run File", category: "Run", keybinding: "f5", run: runActiveFile },
+    {
+      id: "run.preview",
+      title: "Open Live Preview (HTML)",
+      category: "Run",
+      keybinding: "ctrl+shift+v",
+      run: () => {
+        const d = activeDoc();
+        if (d?.path) return openPreview(d.path);
+        return runActiveFile();
+      },
+    },
+    { id: "run.openInBrowser", title: "Open in Browser", category: "Run", keybinding: "ctrl+alt+b", run: openInBrowser },
+    { id: "run.closePreview", title: "Close Live Preview", category: "Run", run: closePreview },
 
     // ----- Terminal -----
     { id: "terminal.toggle", title: "Toggle Terminal", category: "Terminal", keybinding: "ctrl+`", run: toggleTerminal },

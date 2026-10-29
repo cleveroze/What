@@ -14,6 +14,8 @@ import {
   type Tab,
 } from "../../state/editors";
 import { problemsStore } from "../../state/problems";
+import { runKind, runnerLabel } from "../../state/run";
+import { bindingFor, runCommand } from "../../commands/registry";
 import { openContextMenu, openMenuAt } from "../../state/ui";
 import { revealInExplorer } from "../../state/workspace";
 import { FileIcon } from "../FileIcon";
@@ -33,6 +35,10 @@ export function Tabs() {
   const docs = useStore(editorStore, (s) => s.docs);
   const activeId = useStore(editorStore, (s) => s.activeTabId);
   const problems = useStore(problemsStore, (s) => s.items);
+  const activeDocMeta = useStore(editorStore, (s) => {
+    const t = s.tabs.find((x) => x.id === s.activeTabId);
+    return t?.kind === "doc" ? s.docs[t.docId] ?? null : null;
+  });
   const stripRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [closing, setClosing] = useState<string[]>([]);
@@ -188,6 +194,28 @@ export function Tabs() {
       </div>
       {tabs.length > 0 && (
         <div className="tabs-actions">
+          {activeDocMeta && runKind(activeDocMeta) === "preview" && (
+            <button type="button" className="run-btn secondary" onClick={() => runCommand("run.openInBrowser")} data-tip="Open in browser" data-tip-desc="Opens this page in your default web browser." data-tip-keys={bindingFor("run.openInBrowser")}>
+              <Icon name="external" size={14} />
+            </button>
+          )}
+          {activeDocMeta && runKind(activeDocMeta) && (
+            <button
+              type="button"
+              className="run-btn"
+              onClick={() => runCommand("run.file")}
+              data-tip={runKind(activeDocMeta) === "preview" ? "Show live preview" : "Run this file"}
+              data-tip-desc={
+                runKind(activeDocMeta) === "preview"
+                  ? "Shows the page next to your code and refreshes it every time you save."
+                  : `Saves the file and runs it in the terminal${runnerLabel(activeDocMeta) ? ` with ${runnerLabel(activeDocMeta)}` : ""}. The tool must be installed on your PC.`
+              }
+              data-tip-keys={bindingFor("run.file")}
+            >
+              <Icon name={runKind(activeDocMeta) === "preview" ? "eye" : "play"} size={13} />
+              <span>{runKind(activeDocMeta) === "preview" ? "Preview" : "Run"}</span>
+            </button>
+          )}
           <button
             type="button"
             className="icon-btn"
