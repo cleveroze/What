@@ -5,11 +5,13 @@ import { fuzzyMatch } from "../lib/fuzzy";
 import { basename, dirname, relative } from "../lib/path";
 import { useStore } from "../lib/store";
 import { allDocs, getActiveEditor, openFile } from "../state/editors";
+import { completeStep } from "../state/progress";
 import { closePalette, paletteStore, type PickItem } from "../state/ui";
 import { workspaceStore } from "../state/workspace";
 import { FileIcon } from "./FileIcon";
 import { Icon } from "./Icon";
 import { Kbd } from "./ui/controls";
+import { LoadingIndicator } from "./Shape";
 
 interface Row {
   key: string;
@@ -126,7 +128,11 @@ export function CommandPalette() {
         keybinding: bindingFor(c.id),
         positions,
         group: !query && recent.includes(c.id) ? "recently used" : undefined,
-        run: () => finish(() => runCommand(c.id)),
+        run: () =>
+          finish(() => {
+            completeStep("palette");
+            runCommand(c.id);
+          }),
       }));
     }
     if (mode === "line") {
@@ -244,7 +250,15 @@ export function CommandPalette() {
         </div>
         <div className="palette-list" id="palette-list" role="listbox" ref={listRef}>
           {rows.length === 0 && (
-            <div className="palette-empty">{mode === "files" && loadingFiles ? "Indexing files…" : "No matching results"}</div>
+            <div className="palette-empty">
+              {mode === "files" && loadingFiles ? (
+                <>
+                  <LoadingIndicator size={22} label="Indexing files" /> Indexing files…
+                </>
+              ) : (
+                "Nothing found. Tip: type > to search commands instead of files."
+              )}
+            </div>
           )}
           {rows.map((r, i) => (
             <div
@@ -253,6 +267,7 @@ export function CommandPalette() {
               role="option"
               aria-selected={i === index}
               className={`palette-row ${i === index ? "active" : ""}`}
+              style={{ ["--i" as string]: Math.min(i, 14) }}
               onPointerMove={() => i !== index && setIndex(i)}
               onPointerDown={(e) => {
                 e.preventDefault();
@@ -268,6 +283,17 @@ export function CommandPalette() {
               {r.keybinding && <Kbd binding={r.keybinding} />}
             </div>
           ))}
+        </div>
+        <div className="palette-footer" aria-hidden>
+          <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+          <span><kbd>Enter</kbd> {mode === "commands" ? "run" : "open"}</span>
+          {state.mode !== "pick" && (
+            <>
+              <span><kbd>&gt;</kbd> commands</span>
+              <span><kbd>:</kbd> go to line</span>
+            </>
+          )}
+          <span><kbd>Esc</kbd> close</span>
         </div>
       </div>
     </div>

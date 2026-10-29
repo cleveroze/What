@@ -12,6 +12,7 @@
   padding: 0 6px 0 8px;
 }
 .panel-tabs {
+  position: relative;
   display: flex;
   align-items: stretch;
   height: 100%;
@@ -36,24 +37,15 @@
 .panel-tab.active {
   color: var(--text);
 }
-.panel-tab::after {
-  content: "";
+.panel-tab-indicator {
   position: absolute;
-  left: 10px;
-  right: 10px;
   bottom: 4px;
   height: 3px;
   border-radius: 99px;
   background: var(--accent);
-  transform: scaleX(0);
-  opacity: 0;
   transition:
-    transform var(--dur-3) var(--ease-spring),
-    opacity var(--dur-2) var(--ease);
-}
-.panel-tab.active::after {
-  transform: scaleX(1);
-  opacity: 1;
+    left var(--dur-3) var(--ease-spring),
+    width var(--dur-3) var(--ease-spring);
 }
 .panel-actions {
   display: flex;

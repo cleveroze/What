@@ -54,11 +54,11 @@ export { monaco };
 
 const strip = (hex: string) => hex.replace("#", "");
 
-export function defineVersoTheme(t: ThemeTokens) {
+export function defineStrideTheme(t: ThemeTokens) {
   const s = t.syntax;
   const rule = (token: string, fg: string, fontStyle?: string) => ({ token, foreground: strip(fg), fontStyle });
   const strong = t.monochrome ? "bold" : undefined;
-  monaco.editor.defineTheme("verso", {
+  monaco.editor.defineTheme("stride", {
     base: t.dark ? "vs-dark" : "vs",
     inherit: true,
     rules: [
@@ -171,11 +171,11 @@ export function defineVersoTheme(t: ThemeTokens) {
       "editorBracketHighlight.foreground6": s.property,
     },
   });
-  monaco.editor.setTheme("verso");
+  monaco.editor.setTheme("stride");
 }
 
-defineVersoTheme(themeStore.get().tokens);
-themeStore.subscribe(() => defineVersoTheme(themeStore.get().tokens));
+defineStrideTheme(themeStore.get().tokens);
+themeStore.subscribe(() => defineStrideTheme(themeStore.get().tokens));
 
 /** Resolves Monaco's language id for a file path from registered extensions,
  * file names and glob-like filename patterns. */

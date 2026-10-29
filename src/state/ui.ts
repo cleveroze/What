@@ -9,6 +9,7 @@ export interface Toast {
   kind: "info" | "error" | "success" | "warning";
   message: string;
   detail?: string;
+  leaving?: boolean;
 }
 
 let toastSeq = 0;
@@ -22,12 +23,19 @@ export function notify(kind: Toast["kind"], message: string, detail?: string) {
 }
 
 export function dismissToast(id: number) {
-  toastStore.set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+  // Play the exit animation, then remove.
+  toastStore.set((s) => ({ toasts: s.toasts.map((t) => (t.id === id ? { ...t, leaving: true } : t)) }));
+  setTimeout(() => toastStore.set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 240);
 }
 
 export function reportError(context: string, e: unknown) {
   notify("error", context, errorMessage(e));
 }
+
+// ---------- Welcome tour ----------
+
+export const onboardingStore = createStore<{ open: boolean }>({ open: false });
+export const openOnboarding = () => onboardingStore.set({ open: true });
 
 // ---------- Modal dialogs ----------
 

@@ -120,6 +120,7 @@ export function Menu({
               aria-disabled={it.disabled}
               aria-haspopup={it.submenu ? "menu" : undefined}
               data-index={i}
+              style={{ ["--i" as string]: Math.min(i, 16) }}
               className={`menu-item ${i === active ? "active" : ""} ${it.danger ? "danger" : ""}`}
               disabled={it.disabled}
               onMouseEnter={() => {

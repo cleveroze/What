@@ -30,7 +30,7 @@ export function EditorHost({ visible }: { visible: boolean }) {
     const editor = monaco.editor.create(ref.current!, {
       ...editorOptions(settingsStore.get()),
       model: null,
-      theme: "verso",
+      theme: "stride",
     });
     editorRef.current = editor;
     setActiveEditor(editor);

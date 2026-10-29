@@ -10,6 +10,7 @@ import {
   closeTabsToRight,
   editorStore,
   moveTab,
+  savedStore,
   type Tab,
 } from "../../state/editors";
 import { problemsStore } from "../../state/problems";
@@ -34,6 +35,29 @@ export function Tabs() {
   const problems = useStore(problemsStore, (s) => s.items);
   const stripRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
+  const [closing, setClosing] = useState<string[]>([]);
+  const saved = useStore(savedStore, (x) => x);
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    // Re-render once the save confirmation should disappear.
+    if (!saved.at) return;
+    setNow(Date.now());
+    const t = setTimeout(() => setNow(Date.now()), 1300);
+    return () => clearTimeout(t);
+  }, [saved.at]);
+
+  /** Clean tabs collapse away first; dirty ones go straight to the prompt. */
+  const animatedClose = (tab: Tab) => {
+    const doc = tab.kind === "doc" ? docs[tab.docId] : null;
+    if (doc?.dirty || document.documentElement.dataset.animation === "off") {
+      closeTab(tab.id);
+      return;
+    }
+    setClosing((c) => [...c, tab.id]);
+    setTimeout(() => {
+      closeTab(tab.id).finally(() => setClosing((c) => c.filter((id) => id !== tab.id)));
+    }, 170);
+  };
   const dragRef = useRef<DragState | null>(null);
   dragRef.current = drag;
 
@@ -47,7 +71,7 @@ export function Tabs() {
   const menuFor = (tab: Tab, i: number) => {
     const doc = tab.kind === "doc" ? docs[tab.docId] : null;
     return [
-      { label: "Close", keybinding: "ctrl+w", run: () => closeTab(tab.id) },
+      { label: "Close", keybinding: "ctrl+w", run: () => animatedClose(tab) },
       { label: "Close Others", disabled: tabs.length < 2, run: () => closeOtherTabs(tab.id) },
       { label: "Close to the Right", disabled: i === tabs.length - 1, run: () => closeTabsToRight(tab.id) },
       { label: "Close Saved", run: closeSavedTabs },
@@ -62,7 +86,7 @@ export function Tabs() {
   const onPointerDown = (e: React.PointerEvent, i: number, tab: Tab) => {
     if (e.button === 1) {
       e.preventDefault();
-      closeTab(tab.id);
+      animatedClose(tab);
       return;
     }
     if (e.button !== 0 || (e.target as Element).closest(".tab-close")) return;
@@ -116,13 +140,14 @@ export function Tabs() {
           const active = tab.id === activeId;
           const errors = doc ? problems.filter((p) => p.docId === doc.id && p.severity === "error").length : 0;
           const shift = shiftFor(i);
+          const justSaved = !!doc && saved.docId === doc.id && now - saved.at < 1200;
           return (
             <div
               key={tab.id}
               role="tab"
               aria-selected={active}
               tabIndex={active ? 0 : -1}
-              className={`tab ${active ? "active" : ""} ${doc?.dirty ? "dirty" : ""} ${doc?.orphaned ? "orphaned" : ""} ${drag?.active && drag.from === i ? "lifted" : ""}`}
+              className={`tab ${active ? "active" : ""} ${doc?.dirty ? "dirty" : ""} ${doc?.orphaned ? "orphaned" : ""} ${drag?.active && drag.from === i ? "lifted" : ""} ${closing.includes(tab.id) ? "closing" : ""} ${justSaved ? "just-saved" : ""}`}
               style={shift ? { transform: `translateX(${shift}px)` } : undefined}
               title={doc?.path ?? labelFor(tab)}
               onPointerDown={(e) => onPointerDown(e, i, tab)}
@@ -137,7 +162,7 @@ export function Tabs() {
                   activateTab(next.id);
                   (e.currentTarget.parentElement?.children[tabs.indexOf(next)] as HTMLElement)?.focus();
                 }
-                if (e.key === "Delete") closeTab(tab.id);
+                if (e.key === "Delete") animatedClose(tab);
               }}
             >
               {tab.kind === "settings" ? <Icon name="settings" size={14} className="tab-icon" /> : <FileIcon name={doc?.name ?? ""} />}
@@ -150,11 +175,12 @@ export function Tabs() {
                 tabIndex={-1}
                 onClick={(e) => {
                   e.stopPropagation();
-                  closeTab(tab.id);
+                  animatedClose(tab);
                 }}
               >
                 <span className="tab-dirty-dot" aria-hidden />
-                <Icon name="close" size={14} />
+                <Icon name="close" size={14} className="tab-close-x" />
+                {justSaved && <Icon key={saved.at} name="check" size={14} className="tab-saved-check" />}
               </button>
             </div>
           );

@@ -264,7 +264,7 @@ mod tests {
 
     #[test]
     fn finds_matches_with_utf16_ranges() {
-        let dir = std::env::temp_dir().join(format!("verso-search-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("stride-search-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("a.txt"), "😀 Hello\nnothing\nhello hello\n").unwrap();
         let gen = GENERATION.fetch_add(1, Ordering::SeqCst) + 1;

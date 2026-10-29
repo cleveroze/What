@@ -21,11 +21,25 @@ import { confirm, notify, reportError } from "../../state/ui";
 import { resolveDark, themeStore, tokensFor } from "../../theme/engine";
 import { PRESETS, type Preset } from "../../theme/presets";
 import { ACTIVITY_LABELS } from "../ActivityBar";
+import type { ShapeName } from "../../lib/shapes";
+import { openOnboarding } from "../../state/ui";
 import { Icon } from "../Icon";
+import { MorphShape } from "../Shape";
 import { Button, ColorField, IconButton, NumberField, Segmented, Select, Slider, Switch, TextField } from "../ui/controls";
 import { SECTIONS, SETTINGS, type SectionId, type SettingDef } from "./schema";
 import { ShortcutsEditor } from "./ShortcutsEditor";
 import { ThemePreview } from "./ThemePreview";
+
+const SECTION_SHAPES: Record<SectionId, ShapeName> = {
+  general: "cookie9",
+  editor: "pentagon",
+  appearance: "flower",
+  themes: "clover4",
+  terminal: "pill",
+  files: "arch",
+  shortcuts: "cookie4",
+  advanced: "softBurst",
+};
 
 const ACCENT_SWATCHES = ["#c0612b", "#3f7cc0", "#1f8a8a", "#3e8a4f", "#8a5cc0", "#c04a6a", "#262626"];
 
@@ -109,10 +123,10 @@ function SettingControl({ def, settings }: { def: SettingDef; settings: Settings
   }
 }
 
-function SettingRow({ def, settings, showSection }: { def: SettingDef; settings: Settings; showSection?: boolean }) {
+function SettingRow({ def, settings, showSection, index = 0 }: { def: SettingDef; settings: Settings; showSection?: boolean; index?: number }) {
   const modified = JSON.stringify(settings[def.key]) !== JSON.stringify(DEFAULT_SETTINGS[def.key]);
   return (
-    <div className={`setting-row ${def.wide ? "wide" : ""} ${modified ? "modified" : ""}`} data-key={def.key}>
+    <div className={`setting-row ${def.wide ? "wide" : ""} ${modified ? "modified" : ""}`} data-key={def.key} style={{ ["--i" as string]: Math.min(index, 14) }}>
       <div className="setting-text">
         <div className="setting-label">
           {showSection && <span className="setting-section-tag">{SECTIONS.find((s) => s.id === def.section)?.label} ›</span>}
@@ -133,6 +147,7 @@ function SettingRow({ def, settings, showSection }: { def: SettingDef; settings:
 }
 
 function Groups({ defs, settings }: { defs: SettingDef[]; settings: Settings }) {
+  let counter = 0;
   const groups = new Map<string, SettingDef[]>();
   for (const d of defs) {
     const g = d.group ?? "";
@@ -145,7 +160,7 @@ function Groups({ defs, settings }: { defs: SettingDef[]; settings: Settings }) 
           {g && <h3>{g}</h3>}
           <div className="settings-card">
             {list.map((d) => (
-              <SettingRow key={d.key} def={d} settings={settings} />
+              <SettingRow key={d.key} def={d} settings={settings} index={counter++} />
             ))}
           </div>
         </section>
@@ -276,7 +291,7 @@ function AdvancedSection({ settings }: { settings: Settings }) {
     nativeState.dir().then(setDir).catch(() => {});
   }, []);
   const doExport = async () => {
-    const path = await saveDialog({ defaultPath: "verso-settings.json", filters: [{ name: "JSON", extensions: ["json"] }] });
+    const path = await saveDialog({ defaultPath: "stride-settings.json", filters: [{ name: "JSON", extensions: ["json"] }] });
     if (!path) return;
     try {
       await fs.writeText(path, exportSettings(), "utf8");
@@ -435,17 +450,28 @@ export default function SettingsPage() {
               </header>
               {results.length > 0 && (
                 <div className="settings-card">
-                  {results.map((d) => (
-                    <SettingRow key={d.key} def={d} settings={settings} showSection />
+                  {results.map((d, i) => (
+                    <SettingRow key={d.key} def={d} settings={settings} showSection index={i} />
                   ))}
                 </div>
               )}
             </>
           ) : (
             <>
-              <header className="settings-header">
-                <h1>{meta.label}</h1>
-                <p>{meta.description}</p>
+              <header className="settings-header with-art">
+                <span className="settings-header-art">
+                  <MorphShape name={SECTION_SHAPES[section] ?? "circle"} size={52} fill="var(--accent-soft)" spin={90} />
+                  <Icon name={meta.icon} size={22} />
+                </span>
+                <div>
+                  <h1>{meta.label}</h1>
+                  <p>{meta.description}</p>
+                </div>
+                {section === "general" && (
+                  <Button variant="tonal" icon="sliders" onClick={openOnboarding}>
+                    Welcome tour
+                  </Button>
+                )}
               </header>
               {section === "appearance" && (
                 <div className="appearance-preview">

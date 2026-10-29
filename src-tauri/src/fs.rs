@@ -399,7 +399,7 @@ pub fn fs_reveal(path: String) -> Result<(), String> {
     result.map(|_| ()).map_err(|e| format!("Cannot open file manager: {e}"))
 }
 
-/// Paths passed on the command line (e.g. "Open with Verso").
+/// Paths passed on the command line (e.g. "Open with Stride").
 #[tauri::command]
 pub fn app_launch_paths() -> Vec<String> {
     std::env::args()

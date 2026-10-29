@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useStore } from "../lib/store";
 import { closeContextMenu, contextMenuStore, dialogStore, dismissToast, toastStore } from "../state/ui";
+import type { ShapeName } from "../lib/shapes";
 import { Icon } from "./Icon";
+import { MorphShape } from "./Shape";
+
+const TOAST_SHAPES: Record<string, ShapeName> = { error: "softBurst", warning: "triangle", success: "cookie9", info: "clover4" };
 import { Menu } from "./ui/Menu";
 
 export function ContextMenuHost() {
@@ -38,6 +42,7 @@ export function DialogHost() {
     return () => prev?.focus?.();
   }, [dialog]);
   if (!dialog) return null;
+  const danger = dialog.buttons.some((b) => b.danger);
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       e.preventDefault();
@@ -54,6 +59,10 @@ export function DialogHost() {
   return (
     <div className="scrim" onPointerDown={(e) => e.target === e.currentTarget && dialog.resolve(dialog.cancelValue)}>
       <div ref={ref} className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dlg-title" onKeyDown={onKey}>
+        <div className={`dialog-icon ${danger ? "danger" : ""}`}>
+          <MorphShape name={danger ? "softBurst" : "cookie9"} from="circle" size={48} spin={90} fill={danger ? "color-mix(in srgb, var(--danger) 22%, var(--raised))" : "var(--accent-soft)"} />
+          <Icon name={danger ? "warning" : dialog.buttons.length > 1 ? "info" : "success"} size={20} />
+        </div>
         <h2 id="dlg-title">{dialog.title}</h2>
         {dialog.message && <p className="dialog-message">{dialog.message}</p>}
         {dialog.detail && <p className="dialog-detail">{dialog.detail}</p>}
@@ -79,8 +88,11 @@ export function Toasts() {
   return (
     <div className="toasts" role="status" aria-live="polite">
       {toasts.map((t) => (
-        <div key={t.id} className={`toast toast-${t.kind}`}>
-          <Icon name={t.kind === "error" ? "error" : t.kind === "warning" ? "warning" : t.kind === "success" ? "success" : "info"} className="toast-icon" />
+        <div key={t.id} className={`toast toast-${t.kind} ${t.leaving ? "leaving" : ""}`}>
+          <span className="toast-icon">
+            <MorphShape name={TOAST_SHAPES[t.kind]} from="circle" size={30} spin={120} fill="currentColor" />
+            <Icon name={t.kind === "error" ? "close" : t.kind === "warning" ? "warning" : t.kind === "success" ? "check" : "info"} size={15} />
+          </span>
           <div className="toast-body">
             <div className="toast-message">{t.message}</div>
             {t.detail && <div className="toast-detail">{t.detail}</div>}

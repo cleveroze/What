@@ -23,9 +23,7 @@
   width: 30px;
   height: 100%;
 }
-.titlebar-brand svg {
-  pointer-events: none;
-}
+
 .menubar {
   display: flex;
   align-items: center;
@@ -265,26 +263,27 @@ body.resizing-y .sash-horizontal::after {
   color: var(--on-accent-soft);
   background: transparent;
 }
-.activity-item.active:not(.sidebar-item) {
-  background: var(--accent-soft);
-}
+
 .activity-indicator {
   position: absolute;
   top: 2px;
-  left: 5px;
+  left: 50%;
   width: var(--item);
   height: var(--item);
-  border-radius: var(--r-md);
-  background: var(--accent-soft);
+  margin-left: calc(var(--item) / -2);
+  pointer-events: none;
   transform: translateY(calc(var(--active-index) * (var(--item) + 4px)));
   transition:
     transform var(--dur-4) var(--ease-spring),
     opacity var(--dur-2) var(--ease),
     scale var(--dur-3) var(--ease-spring);
 }
+.activity-indicator .shape {
+  display: block;
+}
 .activity-indicator.hidden {
   opacity: 0;
-  scale: 0.6;
+  scale: 0.4;
 }
 .activity-badge {
   position: absolute;
@@ -311,12 +310,12 @@ body.resizing-y .sash-horizontal::after {
   --item: 30px;
 }
 .activitybar.horizontal .activity-item {
-  height: 28px;
+  height: var(--item);
 }
 .activitybar.horizontal .activity-indicator {
-  top: 3px;
+  top: 2px;
   left: 4px;
-  height: 28px;
+  margin-left: 0;
   transform: translateX(calc(var(--active-index) * (var(--item) + 2px)));
 }
 .activitybar.horizontal .activity-badge {

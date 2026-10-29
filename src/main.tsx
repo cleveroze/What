@@ -10,6 +10,8 @@ import "./editor/monaco";
 import { fs } from "./ipc/native";
 import { openFile } from "./state/editors";
 import { installCloseHandler } from "./state/lifecycle";
+import { installRipple } from "./lib/ripple";
+import { initProgress } from "./state/progress";
 import { log } from "./state/output";
 import { load } from "./state/persist";
 import "./state/problems";
@@ -41,6 +43,8 @@ async function boot() {
     registerBuiltinCommands();
     await initKeybindings();
     const lastRoot = await initWorkspace();
+    await initProgress();
+    installRipple();
 
     createRoot(document.getElementById("root")!).render(
       <StrictMode>
@@ -60,7 +64,7 @@ async function boot() {
     // Hidden webviews get no animation frames, so use a timer, not rAF.
     setTimeout(() => win.show().then(() => win.setFocus()).catch(() => {}), 40);
     await restoreSession(lastRoot);
-    log("Verso ready");
+    log("Stride ready");
   } catch (e) {
     reportError("Startup failed", e);
     win.show();

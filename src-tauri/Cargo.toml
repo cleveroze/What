@@ -1,12 +1,12 @@
 [package]
-name = "verso"
+name = "stride"
 version = "0.1.0"
-description = "Verso — an expressive desktop code editor"
+description = "Stride — an expressive desktop code editor"
 edition = "2021"
 rust-version = "1.77.2"
 
 [lib]
-name = "verso_lib"
+name = "stride_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

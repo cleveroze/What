@@ -1,9 +1,9 @@
 {
-  "name": "verso",
+  "name": "stride",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Verso — an expressive, customizable desktop code editor built with Tauri, React and Monaco.",
+  "description": "Stride — an expressive, customizable desktop code editor built with Tauri, React and Monaco.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

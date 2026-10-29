@@ -19,7 +19,7 @@ export function IconButton({
       className={`icon-btn ${active ? "is-active" : ""} ${className ?? ""}`}
       aria-label={label}
       aria-pressed={active}
-      title={label}
+      data-tip={label}
       {...rest}
     >
       <Icon name={icon} size={size} />

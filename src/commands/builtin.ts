@@ -39,7 +39,7 @@ import {
   sendToTerminal,
   terminalStore,
 } from "../state/terminals";
-import { confirm, openPalette, quickPick } from "../state/ui";
+import { confirm, openOnboarding, openPalette, quickPick } from "../state/ui";
 import {
   closeFolder,
   collapseAll,
@@ -552,16 +552,17 @@ export function registerBuiltinCommands() {
     { id: "terminal.selectDefaultShell", title: "Select Default Shell…", category: "Terminal", run: selectDefaultShell },
 
     // ----- Help -----
+    { id: "help.welcomeTour", title: "Welcome Tour", category: "Help", run: openOnboarding },
     {
       id: "help.about",
-      title: "About Verso",
+      title: "About Stride",
       category: "Help",
       run: async () => {
         const { getVersion, getTauriVersion } = await import("@tauri-apps/api/app");
         const { showDialog } = await import("../state/ui");
         const [v, tv] = await Promise.all([getVersion(), getTauriVersion()]);
         await showDialog({
-          title: "Verso",
+          title: "Stride",
           message: `Version ${v}`,
           detail: `Tauri ${tv} · Monaco Editor · xterm.js\n${navigator.userAgent}`,
           buttons: [{ label: "OK", value: true, primary: true }],

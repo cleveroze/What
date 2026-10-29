@@ -66,6 +66,7 @@ const DENSITY = {
 } as const;
 
 export const rowHeight = (s: Settings) => DENSITY[s["ui.density"]].row;
+export const activityItemSize = (s: Settings) => DENSITY[s["ui.density"]].activity - 10;
 
 /** A critically-underdamped spring sampled into a CSS `linear()` easing. */
 function springEasing(damping: number, samples = 40): string {
@@ -122,7 +123,7 @@ let userStyle: HTMLStyleElement | null = null;
 function applyCustomCss(css: string) {
   if (!userStyle) {
     userStyle = document.createElement("style");
-    userStyle.id = "verso-user-css";
+    userStyle.id = "stride-user-css";
     document.head.appendChild(userStyle);
   }
   if (userStyle.textContent !== css) userStyle.textContent = css;
@@ -131,6 +132,18 @@ function applyCustomCss(css: string) {
 }
 
 let lastThemeKey = "";
+let revealOrigin: { x: number; y: number } | null = null;
+
+/** Runs a settings change so the resulting theme switch is revealed as a
+ * growing circle from (x, y) — e.g. the toggle button that was clicked. */
+export function revealThemeFrom(x: number, y: number, change: () => void) {
+  revealOrigin = { x, y };
+  try {
+    change();
+  } finally {
+    revealOrigin = null;
+  }
+}
 let themeAnimTimer: ReturnType<typeof setTimeout> | undefined;
 // View Transitions are only used on Chromium (WebView2), where they are stable.
 const CHROMIUM = /Chrome\//.test(navigator.userAgent);
@@ -151,8 +164,19 @@ function apply(s: Settings, animate: boolean) {
   const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
   const themeChanged = animate && key !== lastThemeKey && !!lastThemeKey && s["ui.animation"] !== "off";
   if (themeChanged && doc.startViewTransition && CHROMIUM) {
-    // WebView2: cross-fade the whole window between the old and new theme.
-    doc.startViewTransition(commit);
+    const root = document.documentElement;
+    if (revealOrigin) {
+      // Circular reveal of the new theme from the control that triggered it.
+      const { x, y } = revealOrigin;
+      const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      root.style.setProperty("--reveal-x", `${x}px`);
+      root.style.setProperty("--reveal-y", `${y}px`);
+      root.style.setProperty("--reveal-r", `${radius}px`);
+      root.classList.add("vt-reveal");
+    }
+    // WebView2: animate the whole window between the old and new theme.
+    const vt = doc.startViewTransition(commit) as { finished?: Promise<void> };
+    vt.finished?.finally(() => root.classList.remove("vt-reveal"));
   } else if (themeChanged) {
     // Other engines: transition colors on every element instead.
     const root = document.documentElement;

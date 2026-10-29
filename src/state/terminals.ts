@@ -7,6 +7,7 @@ import { errorMessage, uid } from "../lib/util";
 import { themeStore } from "../theme/engine";
 import type { ThemeTokens } from "../theme/tokens";
 import { log } from "./output";
+import { completeStep } from "./progress";
 import { getSetting, settingsStore } from "./settings";
 import { reportError } from "./ui";
 import { showPanel, workspaceStore } from "./workspace";
@@ -152,6 +153,7 @@ export async function createTerminal(shellId?: string, cwd?: string | null, focu
   });
 
   terminalStore.set((st) => ({ ...st, sessions: [...st.sessions, session], activeId: id }));
+  completeStep("terminal");
   showPanel("terminal");
 }
 

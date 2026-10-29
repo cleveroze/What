@@ -40,7 +40,7 @@ pub fn run() {
             watcher::watch_stop,
         ])
         .build(tauri::generate_context!())
-        .expect("error while building Verso");
+        .expect("error while building Stride");
 
     app.run(|handle, event| {
         if let RunEvent::Exit = event {

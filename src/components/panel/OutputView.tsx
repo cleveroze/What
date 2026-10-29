@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useStore } from "../../lib/store";
 import { outputStore } from "../../state/output";
+import { EmptyState } from "../EmptyState";
 
 const fmt = (t: number) => new Date(t).toLocaleTimeString(undefined, { hour12: false });
 
@@ -24,7 +25,13 @@ export function OutputView() {
         stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
       }}
     >
-      {entries.length === 0 && <div className="panel-empty"><p>No output yet.</p></div>}
+      {entries.length === 0 && (
+        <div className="panel-empty">
+          <EmptyState shape="pill" icon="info" title="No output yet" size={52}>
+            Stride writes a log of what it does here — saves, errors and terminal events.
+          </EmptyState>
+        </div>
+      )}
       {entries.map((e) => (
         <div key={e.id} className={`log-line log-${e.level}`}>
           <span className="log-time">{fmt(e.time)}</span>

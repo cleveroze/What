@@ -5,6 +5,7 @@ import { basename, dirname, isWithin, rebase, samePath } from "../lib/path";
 import { createStore } from "../lib/store";
 import { errorMessage, isWindows, uid } from "../lib/util";
 import { log } from "./output";
+import { completeStep } from "./progress";
 import { getSetting, settingsStore } from "./settings";
 import { notify, reportError, showDialog } from "./ui";
 import { onTabsChanged, workspaceStore } from "./workspace";
@@ -48,6 +49,9 @@ export interface CursorState {
   tabSize: number;
   insertSpaces: boolean;
 }
+
+/** Last successful save, used for the save confirmation animation. */
+export const savedStore = createStore<{ docId: string | null; name: string; at: number }>({ docId: null, name: "", at: 0 });
 
 export const cursorStore = createStore<CursorState>({
   line: 1,
@@ -266,6 +270,7 @@ export async function openFile(path: string, opts: OpenOptions = {}): Promise<Do
       }
       revealInDoc(id, opts);
       log(`Opened ${path} (${file.encoding.toUpperCase()}, ${file.eol})`);
+      completeStep("file");
       return doc;
     } catch (e) {
       reportError(`Cannot open ${basename(path)}`, e);
@@ -297,6 +302,7 @@ export function newUntitled(language = "plaintext", content = "") {
     },
   }));
   insertTab({ id: tabIdForDoc(id), kind: "doc", docId: id });
+  completeStep("file");
   return id;
 }
 
@@ -396,6 +402,8 @@ export async function saveDoc(docId: string, opts: { saveAs?: boolean; silent?: 
     current.encodingChanged = false;
     patchDoc(docId, { dirty: false, mtime, orphaned: false });
     if (!opts.silent) log(`Saved ${path}`);
+    savedStore.set({ docId, name: basename(path), at: Date.now() });
+    completeStep("save");
     if (pathChanged) onTabsChanged();
     return true;
   } catch (e) {

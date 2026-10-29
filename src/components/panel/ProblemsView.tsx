@@ -3,6 +3,7 @@ import { useStore } from "../../lib/store";
 import { activateTab, getActiveEditor, revealInDoc, tabIdForDoc } from "../../state/editors";
 import { problemsStore, type Problem } from "../../state/problems";
 import { FileIcon } from "../FileIcon";
+import { EmptyState } from "../EmptyState";
 import { Icon } from "../Icon";
 
 function open(p: Problem) {
@@ -29,7 +30,15 @@ export function ProblemsView({ filter }: { filter: string }) {
   if (!groups.length) {
     return (
       <div className="panel-empty">
-        <p>{items.length ? "No problems match the filter." : "No problems have been detected in open files."}</p>
+        {items.length ? (
+          <EmptyState shape="clover4" icon="search" title="Nothing matches the filter" size={52}>
+            Try a different word or clear the filter.
+          </EmptyState>
+        ) : (
+          <EmptyState shape="flower" icon="check" title="No problems — nice work!" size={52}>
+            Errors and warnings from your open files will show up here.
+          </EmptyState>
+        )}
       </div>
     );
   }

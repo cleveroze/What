@@ -10,6 +10,8 @@ import { Sidebar } from "./components/sidebar/Sidebar";
 import { StatusBar } from "./components/StatusBar";
 import { TitleBar } from "./components/TitleBar";
 import { Icon } from "./components/Icon";
+import { Onboarding } from "./components/Onboarding";
+import { TooltipHost } from "./components/Tooltip";
 import { fs } from "./ipc/native";
 import { useStore } from "./lib/store";
 import { clamp } from "./lib/util";
@@ -126,7 +128,9 @@ export function App() {
       <CommandPalette />
       <ContextMenuHost />
       <DialogHost />
+      <Onboarding />
       <Toasts />
+      <TooltipHost />
       {dropping && (
         <div className="drop-overlay" aria-hidden>
           <div className="drop-card">

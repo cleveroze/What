@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Verso",
+  "productName": "Stride",
   "version": "0.1.0",
-  "identifier": "dev.verso.editor",
+  "identifier": "dev.stride.editor",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Verso",
+        "title": "Stride",
         "width": 1320,
         "height": 840,
         "minWidth": 640,

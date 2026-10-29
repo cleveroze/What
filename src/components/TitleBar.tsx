@@ -7,7 +7,11 @@ import { requestExit } from "../state/lifecycle";
 import { settingsStore } from "../state/settings";
 import { openPalette, type MenuEntry, type MenuItem } from "../state/ui";
 import { clearRecent, openFolder, setLayout, workspaceStore } from "../state/workspace";
+import { formatBinding } from "../lib/keys";
+import { setSetting } from "../state/settings";
+import { revealThemeFrom, themeStore } from "../theme/engine";
 import { Icon } from "./Icon";
+import { Logo } from "./Logo";
 import { Menu } from "./ui/Menu";
 
 const cmd = (id: string, label?: string): MenuItem => {
@@ -186,6 +190,7 @@ function buildMenus(): { id: string; label: string; mnemonic: string; items: () 
       label: "Help",
       mnemonic: "h",
       items: () => [
+        cmd("help.welcomeTour"),
         cmd("workbench.commandPalette", "Show All Commands"),
         cmd("settings.shortcuts", "Keyboard Shortcuts Reference"),
         "separator",
@@ -211,20 +216,41 @@ function WindowControls() {
   const win = getCurrentWindow();
   return (
     <div className="window-controls">
-      <button type="button" className="wc" aria-label="Minimize" title="Minimize" onClick={() => win.minimize()}>
+      <button type="button" className="wc" aria-label="Minimize" data-tip="Minimize" onClick={() => win.minimize()}>
         <Icon name="win-min" size={16} />
       </button>
-      <button type="button" className="wc" aria-label={maximized ? "Restore" : "Maximize"} title={maximized ? "Restore Down" : "Maximize"} onClick={() => win.toggleMaximize()}>
+      <button type="button" className="wc" aria-label={maximized ? "Restore" : "Maximize"} data-tip={maximized ? "Restore down" : "Maximize"} onClick={() => win.toggleMaximize()}>
         <Icon name={maximized ? "win-restore" : "win-max"} size={16} />
       </button>
-      <button type="button" className="wc wc-close" aria-label="Close" title="Close" onClick={requestExit}>
+      <button type="button" className="wc wc-close" aria-label="Close" data-tip="Close" onClick={requestExit}>
         <Icon name="win-close" size={16} />
       </button>
     </div>
   );
 }
 
+function ThemeToggle() {
+  const dark = useStore(themeStore, (s) => s.tokens.dark);
+  return (
+    <button
+      type="button"
+      className={`icon-btn theme-toggle ${dark ? "dark" : "light"}`}
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+      data-tip={dark ? "Switch to light theme" : "Switch to dark theme"}
+      data-tip-desc="Changes are animated and saved automatically. More colors in Settings → Themes."
+      onClick={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        revealThemeFrom(r.left + r.width / 2, r.top + r.height / 2, () => setSetting("theme.mode", dark ? "light" : "dark"));
+      }}
+    >
+      <Icon name="sun" size={16} className="tt-sun" />
+      <Icon name="moon" size={16} className="tt-moon" />
+    </button>
+  );
+}
+
 export function TitleBar() {
+  const [logoHover, setLogoHover] = useState(false);
   const root = useStore(workspaceStore, (s) => s.root);
   const layout = useStore(workspaceStore, (s) => s.layout);
   useStore(settingsStore, (s) => s);
@@ -265,11 +291,8 @@ export function TitleBar() {
 
   return (
     <header className="titlebar" data-tauri-drag-region>
-      <div className="titlebar-brand" data-tauri-drag-region>
-        <svg viewBox="0 0 1024 1024" width="18" height="18" aria-hidden>
-          <path d="M512 64c260 0 448 56 448 448s-188 448-448 448S64 904 64 512 252 64 512 64z" fill="var(--accent)" />
-          <path d="M300 330 L512 720 L724 330" fill="none" stroke="var(--on-accent)" strokeWidth="110" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      <div className="titlebar-brand" onPointerEnter={() => setLogoHover(true)} onPointerLeave={() => setLogoHover(false)}>
+        <Logo size={20} shape={logoHover ? "softBurst" : "cookie9"} />
       </div>
       <nav className="menubar" role="menubar" aria-label="Application menu">
         {menus.map((m, i) => (
@@ -300,18 +323,29 @@ export function TitleBar() {
         ))}
       </nav>
       <div className="titlebar-drag" data-tauri-drag-region />
-      <button type="button" className="command-center" onClick={() => openPalette("files")} title="Search files (Ctrl+P)">
+      <button
+        type="button"
+        className="command-center"
+        onClick={() => openPalette("files")}
+        data-tip="Search files and commands"
+        data-tip-desc="Type a file name to open it, or start with > to run any command."
+        data-tip-keys={bindingFor("workbench.quickOpen")}
+      >
         <Icon name="search" size={14} />
-        <span>{root ? basename(root) : "Verso"}</span>
+        <span>{root ? `Search ${basename(root)}` : "Search files and commands"}</span>
+        <span className="command-center-hint">{formatBinding(bindingFor("workbench.quickOpen"))}</span>
       </button>
       <div className="titlebar-drag" data-tauri-drag-region />
       <div className="titlebar-actions">
+        <ThemeToggle />
         <button
           type="button"
           className={`icon-btn ${layout.sidebarVisible ? "is-active" : ""}`}
           aria-label="Toggle Primary Side Bar"
           aria-pressed={layout.sidebarVisible}
-          title={`Toggle Primary Side Bar (${bindingFor("view.toggleSidebar")?.toUpperCase() ?? ""})`}
+          data-tip="Toggle side bar"
+          data-tip-desc="Show or hide the Explorer and Search panel."
+          data-tip-keys={bindingFor("view.toggleSidebar")}
           onClick={() => setLayout({ sidebarVisible: !layout.sidebarVisible })}
         >
           <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
@@ -324,7 +358,9 @@ export function TitleBar() {
           className={`icon-btn ${layout.panelVisible ? "is-active" : ""}`}
           aria-label="Toggle Panel"
           aria-pressed={layout.panelVisible}
-          title="Toggle Panel (Ctrl+J)"
+          data-tip="Toggle panel"
+          data-tip-desc="Show or hide the Terminal, Output and Problems area."
+          data-tip-keys={bindingFor("view.togglePanel")}
           onClick={() => setLayout({ panelVisible: !layout.panelVisible })}
         >
           <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>

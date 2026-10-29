@@ -13,6 +13,9 @@ export interface Settings {
   "workbench.restoreWorkspace": boolean;
   "workbench.confirmClose": boolean;
   "workbench.showWelcome": boolean;
+  "workbench.onboarded": boolean;
+  "workbench.tips": boolean;
+  "workbench.checklist": boolean;
   "window.zoom": number;
   // Appearance
   "theme.mode": ThemeMode;
@@ -87,6 +90,9 @@ export const DEFAULT_SETTINGS: Settings = {
   "workbench.restoreWorkspace": true,
   "workbench.confirmClose": true,
   "workbench.showWelcome": true,
+  "workbench.onboarded": false,
+  "workbench.tips": true,
+  "workbench.checklist": true,
   "window.zoom": 1,
   "theme.mode": "system",
   "theme.preset": "cream",

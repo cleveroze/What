@@ -1,12 +1,30 @@
-# Verso
+# Stride
 
 A desktop code editor for Windows 10/11, built with **Tauri 2**, **React**, **TypeScript** and **Monaco**. Its look combines Material 3 Expressive (rounded surfaces, spring motion, tonal color) with the dense, strict layout you expect from a desktop IDE.
 
-![Verso with the Cream preset](docs/screenshot.png)
+![Stride with the Ocean preset](docs/screenshot.png)
 
 Everything in the UI runs against the real machine. Files are read and written by the Rust backend, the terminal runs real shells in a Windows pseudo-console (ConPTY), search walks the disk with gitignore rules applied, and an OS file watcher keeps the explorer and open editors in sync.
 
 ## Features
+
+**Material 3 Expressive design:**
+- A library of 35 M3 Expressive shapes (cookies, clovers, bursts, flowers, pills, gems, heart…) generated in code. Any shape can morph into any other with spring physics.
+- The activity bar indicator morphs and slides between items; dialogs, toasts, empty states, settings headers and the welcome page all use morphing shapes.
+- The M3 Expressive loading indicator (a rotating, morphing shape) appears only while real work runs: search, file indexing.
+- Ripples on interactive elements; buttons change shape when pressed; springy tooltips, menus and dialogs.
+- Staggered entrances for lists (explorer folders, search results, menus, palette, settings).
+- Theme switching uses a circular reveal from the button you clicked.
+- Tabs collapse when closed and show a check mark after saving; a "Saved" chip appears in the status bar.
+- Motion can be set to Lively, Calm or Off.
+
+**Made for beginners:**
+- A welcome tour on first launch: pick a look, text size, spacing and motion. It can be reopened from Help → Welcome Tour.
+- A "First steps" checklist on the welcome page. Each step ticks itself off when you actually do it (open a folder, save, use the palette, open the terminal…).
+- A tips carousel with "Try it" buttons.
+- Rich tooltips that explain what each button and status bar item does, with its shortcut.
+- Friendly empty states that explain what a panel is for and offer the next action.
+- The command palette shows how to use it (`>` commands, `:` go to line).
 
 **Editing:** Monaco with syntax highlighting for more than 80 languages. Autocomplete, bracket matching and colorization, code folding, minimap, multi-cursor, sticky scroll, find/replace and go-to-symbol are all included. TypeScript, JavaScript, JSON, CSS and HTML also get diagnostics, which feed the Problems panel.
 
@@ -16,7 +34,7 @@ Everything in the UI runs against the real machine. Files are read and written b
 - Auto save: after a delay, or when focus changes.
 - Encodings: UTF-8, UTF-8 with BOM, UTF-16 LE/BE and Windows-1252 are detected on open and kept on save.
 - Line endings: LF/CRLF detection and conversion.
-- If a file changed on disk since you opened it, Verso warns you before overwriting it.
+- If a file changed on disk since you opened it, Stride warns you before overwriting it.
 
 **Workspace:**
 - Recent folders.
@@ -72,7 +90,7 @@ The **Settings** page has a searchable sidebar with General, Editor, Appearance,
 │ search.rs    gitignore-aware, cancellable search & replace (ignore + regex crates)    │
 │ terminal.rs  ConPTY/PTY sessions via portable-pty, streamed over IPC channels          │
 │ watcher.rs   recursive folder watching (notify), debounced change batches             │
-│ state.rs     atomic JSON persistence in %APPDATA%\dev.verso.editor                     │
+│ state.rs     atomic JSON persistence in %APPDATA%\dev.stride.editor                     │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -93,7 +111,7 @@ src/
   components/                workbench UI (ui/ holds reusable controls)
   editor/monaco.ts
   ipc/native.ts
-  lib/                       store, path, color (OKLCH), fuzzy, glob, keys, util
+  lib/                       store, path, color (OKLCH), shapes (M3 Expressive), ripple, fuzzy, glob, keys, util
   state/                     application state and actions
   styles/                    base, controls, workbench, sidebar, editor, panel, overlays, settings
   theme/                     presets.ts, tokens.ts, engine.ts

@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { bindingFor } from "../../commands/registry";
-import { formatBinding } from "../../lib/keys";
 import { useStore } from "../../lib/store";
 import { clearOutput } from "../../state/output";
 import { problemsStore } from "../../state/problems";
@@ -20,6 +19,12 @@ import { OutputView } from "./OutputView";
 import { ProblemsView } from "./ProblemsView";
 import { TerminalView } from "./TerminalView";
 
+const PANEL_DESCRIPTIONS: Record<PanelTab, string> = {
+  problems: "Errors and warnings in your open files. Click one to jump to it.",
+  output: "A log of what Stride is doing, useful when something goes wrong.",
+  terminal: "Run commands in PowerShell or CMD, right in your project folder.",
+};
+
 const TABS: { id: PanelTab; label: string; command: string }[] = [
   { id: "problems", label: "Problems", command: "view.problems" },
   { id: "output", label: "Output", command: "view.output" },
@@ -33,7 +38,13 @@ export function Panel() {
   const activeTerm = useStore(terminalStore, (s) => s.activeId);
   const [filter, setFilter] = useState("");
   const tab = layout.panelTab;
-  const tabIndex = TABS.findIndex((t) => t.id === tab);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+  // Slide a single indicator between tabs (measured, since labels differ in width).
+  useLayoutEffect(() => {
+    const el = tabsRef.current?.querySelector<HTMLElement>(".panel-tab.active");
+    if (el) setIndicator({ left: el.offsetLeft + 10, width: el.offsetWidth - 20 });
+  }, [tab, counts]);
 
   const shellMenu = async (e: React.MouseEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -48,7 +59,8 @@ export function Panel() {
   return (
     <section className="panel sheet" aria-label="Panel">
       <div className="panel-header">
-        <div className="panel-tabs" role="tablist" style={{ ["--tab-index" as string]: tabIndex }}>
+        <div className="panel-tabs" role="tablist" ref={tabsRef}>
+          {indicator && <span className="panel-tab-indicator" style={{ left: indicator.left, width: indicator.width }} aria-hidden />}
           {TABS.map((t) => {
             const key = bindingFor(t.command);
             return (
@@ -58,11 +70,17 @@ export function Panel() {
                 role="tab"
                 aria-selected={tab === t.id}
                 className={`panel-tab ${tab === t.id ? "active" : ""}`}
-                title={key ? `${t.label} (${formatBinding(key)})` : t.label}
+                data-tip={t.label}
+                data-tip-keys={key}
+                data-tip-desc={PANEL_DESCRIPTIONS[t.id]}
                 onClick={() => setLayout({ panelTab: t.id })}
               >
                 {t.label}
-                {t.id === "problems" && counts > 0 && <span className="count-badge">{counts}</span>}
+                {t.id === "problems" && counts > 0 && (
+                  <span key={counts} className="count-badge">
+                    {counts}
+                  </span>
+                )}
               </button>
             );
           })}

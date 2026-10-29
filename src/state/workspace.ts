@@ -15,6 +15,7 @@ import {
   setViewState,
 } from "./editors";
 import { log } from "./output";
+import { completeStep } from "./progress";
 import { load, persist } from "./persist";
 import { getSetting, settingsStore } from "./settings";
 import { reportError } from "./ui";
@@ -94,6 +95,8 @@ export interface ExplorerState {
   edit: InlineEdit | null;
   clipboard: { paths: string[]; cut: boolean } | null;
   errors: Record<string, string>;
+  /** Folder most recently expanded, for the staggered reveal animation. */
+  lastExpanded?: { key: string; at: number };
 }
 
 export const explorerStore = createStore<ExplorerState>({
@@ -144,7 +147,11 @@ export async function toggleDir(path: string, expand?: boolean) {
   const key = dirKey(path);
   const isOpen = !!explorerStore.get().expanded[key];
   const next = expand ?? !isOpen;
-  explorerStore.set((s) => ({ ...s, expanded: { ...s.expanded, [key]: next } }));
+  explorerStore.set((s) => ({
+    ...s,
+    expanded: { ...s.expanded, [key]: next },
+    lastExpanded: next ? { key, at: Date.now() } : s.lastExpanded,
+  }));
   if (next && !explorerStore.get().dirs[key]) await loadDir(path);
   saveFolderState();
 }
@@ -260,7 +267,7 @@ function updateTitle() {
   const { root } = workspaceStore.get();
   const tab = activeTab();
   const doc = tab?.kind === "doc" ? editorStore.get().docs[tab.docId] : null;
-  const parts = [doc?.name ?? (tab?.kind === "settings" ? "Settings" : null), root ? basename(root) : null, "Verso"];
+  const parts = [doc?.name ?? (tab?.kind === "settings" ? "Settings" : null), root ? basename(root) : null, "Stride"];
   const title = parts.filter(Boolean).join(" — ");
   document.title = title;
   getCurrentWindow().setTitle(title).catch(() => {});
@@ -301,6 +308,7 @@ export async function openFolder(path: string, opts: { restoreTabs?: boolean; sk
   persistSession();
   updateTitle();
   log(`Opened folder ${path}`);
+  completeStep("folder");
   return true;
 }
 

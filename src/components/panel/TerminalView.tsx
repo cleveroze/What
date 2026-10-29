@@ -3,6 +3,7 @@ import { useStore } from "../../lib/store";
 import { createTerminal, ensureTerminal, fitTerminal, focusTerminal, mountTerminal, terminalStore } from "../../state/terminals";
 import { workspaceStore } from "../../state/workspace";
 import { Button } from "../ui/controls";
+import { EmptyState } from "../EmptyState";
 
 export function TerminalView({ visible }: { visible: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -44,10 +45,19 @@ export function TerminalView({ visible }: { visible: boolean }) {
     <div className="terminal-view" ref={ref} onClick={() => focusTerminal()}>
       {count === 0 && (
         <div className="panel-empty">
-          <p>No terminal is running.</p>
-          <Button variant="tonal" icon="plus" onClick={() => createTerminal()}>
-            New Terminal
-          </Button>
+          <EmptyState
+            shape="cookie6"
+            icon="terminal"
+            title="No terminal is running"
+            size={52}
+            action={
+              <Button variant="tonal" icon="plus" onClick={() => createTerminal()}>
+                New terminal
+              </Button>
+            }
+          >
+            A terminal lets you run commands (like npm or git) inside your project folder.
+          </EmptyState>
         </div>
       )}
     </div>

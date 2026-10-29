@@ -6,7 +6,9 @@ import { openFile } from "../../state/editors";
 import { clearSearch, replaceInFiles, runSearch, searchStore, setSearch } from "../../state/search";
 import { openContextMenu } from "../../state/ui";
 import { workspaceStore } from "../../state/workspace";
+import { EmptyState } from "../EmptyState";
 import { FileIcon } from "../FileIcon";
+import { LoadingIndicator } from "../Shape";
 import { Icon } from "../Icon";
 import { Button, IconButton } from "../ui/controls";
 
@@ -59,10 +61,18 @@ export function SearchView() {
   if (!root) {
     return (
       <div className="explorer-empty">
-        <p>Open a folder to search across its files.</p>
-        <Button variant="filled" icon="folder-open" onClick={pickOpenFolder}>
-          Open Folder
-        </Button>
+        <EmptyState
+          shape="clover4"
+          icon="search"
+          title="Search needs a folder"
+          action={
+            <Button variant="filled" icon="folder-open" onClick={pickOpenFolder}>
+              Open folder
+            </Button>
+          }
+        >
+          Open a project folder, then find any text in all of its files at once.
+        </EmptyState>
       </div>
     );
   }
@@ -170,7 +180,12 @@ export function SearchView() {
       </div>
 
       <div className="search-summary" aria-live="polite">
-        {s.running && <span className="progress-line" aria-label="Searching" />}
+        {s.running && (
+          <span className="search-running">
+            <LoadingIndicator size={22} label="Searching" />
+            Searching…
+          </span>
+        )}
         {s.error && <span className="error-text">{s.error}</span>}
         {!s.error && result && (
           <span>
@@ -183,12 +198,22 @@ export function SearchView() {
       </div>
 
       <div className="search-results" role="tree" aria-label="Search results">
-        {result?.files.map((f) => {
+        {!s.query && !s.running && (
+          <EmptyState shape="clover8" icon="search" title="Find text in every file" size={56}>
+            Type above to search the whole folder. Use the buttons in the box to match case, whole words or regular expressions.
+          </EmptyState>
+        )}
+        {s.query && result && result.totalMatches === 0 && !s.running && (
+          <EmptyState shape="ghostish" icon="search" title="No results" size={56}>
+            Check the spelling, or turn off “Match case” and “Whole word”.
+          </EmptyState>
+        )}
+        {result?.files.map((f, fileIndex) => {
           const collapsed = s.collapsed[f.path];
           const rel = relative(root, f.path);
           const count = f.matches.reduce((n, m) => n + m.ranges.length, 0);
           return (
-            <div key={f.path} className="search-file" role="treeitem" aria-expanded={!collapsed}>
+            <div key={f.path} className="search-file" role="treeitem" aria-expanded={!collapsed} style={{ ["--i" as string]: Math.min(fileIndex, 14) }}>
               <div
                 className="search-file-row"
                 onClick={() => setSearch({ collapsed: { ...s.collapsed, [f.path]: !collapsed } }, false)}

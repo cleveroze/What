@@ -32,12 +32,13 @@ import {
   type InlineEdit,
 } from "../../state/workspace";
 import { rowHeight } from "../../theme/engine";
+import { EmptyState } from "../EmptyState";
 import { FileIcon } from "../FileIcon";
 import { Icon } from "../Icon";
 import { Button, IconButton } from "../ui/controls";
 
 type Row =
-  | { kind: "entry"; entry: DirEntry; depth: number; expanded: boolean }
+  | { kind: "entry"; entry: DirEntry; depth: number; expanded: boolean; parent: string; childIndex: number }
   | { kind: "edit"; edit: InlineEdit; depth: number; isDir: boolean; initial: string }
   | { kind: "message"; text: string; depth: number; error?: boolean };
 
@@ -60,6 +61,7 @@ function buildRows(root: string, state: ReturnType<typeof explorerStore.get>): R
       rows.push({ kind: "message", text: "Loading…", depth });
       return;
     }
+    let childIndex = 0;
     for (const entry of entries) {
       if (isExcluded(entry)) continue;
       if (edit?.kind === "rename" && samePath(edit.target, entry.path)) {
@@ -67,7 +69,7 @@ function buildRows(root: string, state: ReturnType<typeof explorerStore.get>): R
         continue;
       }
       const expanded = entry.isDir && !!state.expanded[dirKey(entry.path)];
-      rows.push({ kind: "entry", entry, depth, expanded });
+      rows.push({ kind: "entry", entry, depth, expanded, parent: dirKey(dir), childIndex: childIndex++ });
       if (expanded) walk(entry.path, depth + 1);
     }
   };
@@ -179,10 +181,18 @@ export function Explorer() {
   if (!root) {
     return (
       <div className="explorer-empty">
-        <p>You have not opened a folder yet.</p>
-        <Button variant="filled" icon="folder-open" onClick={pickOpenFolder}>
-          Open Folder
-        </Button>
+        <EmptyState
+          shape="cookie9"
+          icon="folder-open"
+          title="No folder open yet"
+          action={
+            <Button variant="filled" icon="folder-open" onClick={pickOpenFolder}>
+              Open folder
+            </Button>
+          }
+        >
+          Open the folder of your project and all its files will be listed here. You can also drag a folder onto this window.
+        </EmptyState>
         {recent.length > 0 && (
           <>
             <div className="explorer-empty-heading">Recent</div>
@@ -403,6 +413,8 @@ export function Explorer() {
             const selected = !!state.selected && samePath(state.selected, entry.path);
             const isActive = !!activePath && samePath(activePath, entry.path);
             const dropTarget = !!drag?.target && entry.isDir && samePath(drag.target, entry.path);
+            const entering =
+              !!state.lastExpanded && state.lastExpanded.key === row.parent && Date.now() - state.lastExpanded.at < 600 && row.childIndex < 16;
             return (
               <div
                 key={entry.path}
@@ -412,9 +424,10 @@ export function Explorer() {
                 aria-selected={selected}
                 data-row-path={entry.path}
                 data-is-dir={entry.isDir}
-                className={`tree-row ${selected ? "selected" : ""} ${isActive ? "active-file" : ""} ${dropTarget ? "drop-target" : ""} ${cutPaths.some((p) => samePath(p, entry.path)) ? "cut" : ""}`}
-                style={style}
-                title={entry.path}
+                className={`tree-row ${entering ? "entering" : ""} ${selected ? "selected" : ""} ${isActive ? "active-file" : ""} ${dropTarget ? "drop-target" : ""} ${cutPaths.some((p) => samePath(p, entry.path)) ? "cut" : ""}`}
+                style={entering ? { ...style, ["--i" as string]: row.childIndex } : style}
+                data-tip={entry.isDir ? undefined : entry.path}
+                data-tip-desc={entry.isDir ? undefined : "Click to open. Right-click for rename, copy, delete and more. Drag onto a folder to move."}
                 onPointerDown={(e) => {
                   if (e.button !== 0) return;
                   dragStart.current = { path: entry.path, x: e.clientX, y: e.clientY };
