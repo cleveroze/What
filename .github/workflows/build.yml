@@ -37,6 +37,8 @@ jobs:
     name: Windows installer
     runs-on: windows-latest
     needs: check
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -56,3 +58,22 @@ jobs:
             src-tauri/target/release/bundle/nsis/*.exe
             src-tauri/target/release/bundle/msi/*.msi
             src-tauri/target/release/stride.exe
+      - name: Publish downloadable release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          New-Item -ItemType Directory -Force release | Out-Null
+          Copy-Item (Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1).FullName release/Stride-Setup.exe
+          Copy-Item (Get-ChildItem src-tauri/target/release/bundle/msi/*.msi | Select-Object -First 1).FullName release/Stride.msi
+          Copy-Item src-tauri/target/release/stride.exe release/Stride-Portable.exe
+          # Replace the rolling "latest build" release with this build.
+          gh release delete stride-latest --yes --cleanup-tag 2>$null
+          $notes = "Latest build of Stride for Windows 10/11.`n`n" +
+            "- **Stride-Setup.exe** - installer (recommended, no admin rights needed)`n" +
+            "- **Stride.msi** - MSI installer`n" +
+            "- **Stride-Portable.exe** - run without installing`n`n" +
+            "Windows may show 'Windows protected your PC' because the app is not code-signed: click More info -> Run anyway.`n`n" +
+            "Built from commit $env:GITHUB_SHA."
+          gh release create stride-latest release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe `
+            --title "Stride (latest build)" --notes $notes --target $env:GITHUB_SHA --latest

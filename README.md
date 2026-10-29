@@ -121,6 +121,12 @@ src-tauri/
   tauri.conf.json
 ```
 
+## Download
+
+**[⬇ Download Stride for Windows (installer)](https://github.com/cleveroze/What/releases/latest/download/Stride-Setup.exe)**
+
+Other options are on the [releases page](https://github.com/cleveroze/What/releases/latest): an MSI installer and a portable `.exe`. The app is not code-signed, so Windows may say "Windows protected your PC" — click **More info → Run anyway**.
+
 ## Building
 
 Prerequisites on Windows:
