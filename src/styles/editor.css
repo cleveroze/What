@@ -1,0 +1,336 @@
+/* ---------- Editor area ---------- */
+.editor-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--editor);
+}
+.editor-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+.monaco-host {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.editor-empty {
+  flex: 1;
+}
+
+/* ---------- Tabs ---------- */
+.tabs-bar {
+  display: flex;
+  align-items: stretch;
+  height: var(--tab-h);
+  flex: none;
+  background: var(--surface);
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+.tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  padding: 4px 4px 0;
+  gap: 2px;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  max-width: 240px;
+  padding: 0 4px 0 10px;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  white-space: nowrap;
+  animation: rise-in var(--dur-3) var(--ease-spring);
+  transition:
+    background-color var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease),
+    transform var(--dur-3) var(--ease-spring);
+}
+.tabs.dragging .tab {
+  transition:
+    background-color var(--dur-1) var(--ease),
+    transform var(--dur-2) var(--ease);
+}
+.tab.lifted {
+  z-index: 3;
+  transition: none !important;
+  background: var(--raised);
+  box-shadow: 0 4px 14px hsl(var(--shadow-color) / 0.22);
+  border-radius: var(--r-md);
+}
+.tab:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.tab.active {
+  background: var(--editor);
+  color: var(--text);
+  box-shadow:
+    1px 0 0 var(--border),
+    -1px 0 0 var(--border),
+    0 -1px 0 var(--border);
+}
+.tab::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  border-radius: 0 0 99px 99px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform var(--dur-3) var(--ease-spring);
+}
+.tab.active::before {
+  transform: scaleX(1);
+}
+.tab-icon {
+  color: var(--text-muted);
+}
+.tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tab-label.has-errors {
+  color: var(--danger);
+}
+.tab.orphaned .tab-label {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+.tab-deleted {
+  font-size: 10.5px;
+  color: var(--danger);
+}
+.tab-close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-xs);
+  color: var(--text-muted);
+}
+.tab-close .icon {
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity var(--dur-1) var(--ease),
+    transform var(--dur-2) var(--ease-spring);
+}
+.tab:hover .tab-close .icon,
+.tab.active .tab-close .icon {
+  opacity: 1;
+  transform: none;
+}
+.tab-close:hover {
+  background: var(--active);
+  color: var(--text);
+}
+.tab-dirty-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--text-muted);
+  opacity: 0;
+  transform: scale(0);
+  transition:
+    opacity var(--dur-1) var(--ease),
+    transform var(--dur-3) var(--ease-spring);
+}
+.tab.dirty .tab-dirty-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+.tab.dirty.active .tab-dirty-dot {
+  background: var(--accent);
+}
+.tab.dirty .tab-close .icon {
+  opacity: 0;
+}
+.tab.dirty .tab-close:hover .tab-dirty-dot {
+  opacity: 0;
+  transform: scale(0.4);
+}
+.tab.dirty .tab-close:hover .icon {
+  opacity: 1;
+  transform: none;
+}
+.tabs-actions {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+/* ---------- Breadcrumbs ---------- */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  flex: none;
+  padding: 0 10px;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--editor);
+  white-space: nowrap;
+}
+.crumb-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+.crumb-sep {
+  color: var(--text-faint);
+  margin: 0 1px;
+}
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: var(--r-xs);
+}
+.crumb:hover:not(:disabled) {
+  background: var(--hover);
+  color: var(--text);
+}
+.crumb.file {
+  color: var(--text);
+}
+
+/* ---------- Welcome ---------- */
+.welcome {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+.welcome-inner {
+  width: min(760px, 100%);
+  animation: rise-in var(--dur-4) var(--ease-out);
+}
+.welcome-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+.welcome-brand h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.welcome-brand p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+}
+.welcome-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 40px;
+}
+.welcome h2 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.welcome-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  margin: 0 -10px;
+  border-radius: var(--r-md);
+  color: var(--accent);
+  font-weight: 550;
+  text-align: left;
+  transition: background-color var(--dur-1) var(--ease);
+}
+.welcome-action .kbd-group {
+  margin-left: auto;
+}
+.welcome-action {
+  white-space: nowrap;
+}
+.welcome-action:hover {
+  background: var(--hover);
+}
+.welcome-recent {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  margin: 0 -10px;
+  border-radius: var(--r-md);
+  text-align: left;
+}
+.welcome-recent:hover {
+  background: var(--hover);
+}
+.welcome-recent-name {
+  color: var(--accent);
+  font-weight: 550;
+  white-space: nowrap;
+}
+.welcome-recent-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+.welcome-hints {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 24px;
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.welcome-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  margin: 0 -8px;
+  border-radius: var(--r-sm);
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+.welcome-hint:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .welcome-grid {
+    grid-template-columns: 1fr;
+  }
+}
