@@ -1,0 +1,31 @@
+[package]
+name = "verso"
+version = "0.1.0"
+description = "Verso — an expressive desktop code editor"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "verso_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+portable-pty = "0.9"
+notify = "8"
+ignore = "0.4"
+regex = "1"
+trash = "5"
+encoding_rs = "0.8"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+strip = true
