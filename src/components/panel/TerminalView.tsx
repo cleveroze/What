@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useStore } from "../../lib/store";
 import { createTerminal, ensureTerminal, fitTerminal, focusTerminal, mountTerminal, terminalStore } from "../../state/terminals";
+import { workspaceStore } from "../../state/workspace";
 import { Button } from "../ui/controls";
 
 export function TerminalView({ visible }: { visible: boolean }) {
@@ -33,9 +34,11 @@ export function TerminalView({ visible }: { visible: boolean }) {
     return () => ro.disconnect();
   }, []);
 
+  // Wait for session restore so the shell starts in the workspace folder.
+  const ready = useStore(workspaceStore, (s) => s.ready);
   useEffect(() => {
-    if (visible) ensureTerminal();
-  }, [visible]);
+    if (visible && ready) ensureTerminal();
+  }, [visible, ready]);
 
   return (
     <div className="terminal-view" ref={ref} onClick={() => focusTerminal()}>

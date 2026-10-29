@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { allCommands, bindingFor, recentCommandIds, runCommand } from "../commands/registry";
+import { allCommands, bindingFor, recentCommandIds, runCommand, type Command } from "../commands/registry";
 import { fs } from "../ipc/native";
 import { fuzzyMatch } from "../lib/fuzzy";
 import { basename, dirname, relative } from "../lib/path";
@@ -85,55 +85,49 @@ export function CommandPalette() {
   const rows: Row[] = useMemo(() => {
     if (!state.open) return [];
     if (mode === "pick") {
-      const items = state.items ?? [];
-      return items
-        .map((it: PickItem, i) => {
-          const m = fuzzyMatch(query, it.label);
-          return m && { it, i, m };
-        })
-        .filter(Boolean)
-        .sort((a, b) => (query ? b!.m.score - a!.m.score : a!.i - b!.i))
-        .map(({ it, i, m }: any) => ({
-          key: `pick-${i}`,
-          label: it.label,
-          description: it.description,
-          icon: it.icon ? <Icon name={it.icon} size={15} /> : undefined,
-          positions: m.positions,
-          run: () => {
-            const resolve = paletteStore.get().resolve;
-            paletteStore.set({ open: false, mode: "commands", initial: "" });
-            resolve?.(it.value);
-          },
-        }));
+      const scored: { it: PickItem; i: number; positions: number[]; score: number }[] = [];
+      (state.items ?? []).forEach((it, i) => {
+        const m = fuzzyMatch(query, it.label);
+        if (m) scored.push({ it, i, positions: m.positions, score: m.score });
+      });
+      scored.sort((a, b) => (query ? b.score - a.score : a.i - b.i));
+      return scored.map(({ it, i, positions }) => ({
+        key: `pick-${i}`,
+        label: it.label,
+        description: it.description,
+        icon: it.icon ? <Icon name={it.icon} size={15} /> : undefined,
+        positions,
+        run: () => {
+          const resolve = paletteStore.get().resolve;
+          paletteStore.set({ open: false, mode: "commands", initial: "" });
+          resolve?.(it.value);
+        },
+      }));
     }
     if (mode === "commands") {
       const recent = recentCommandIds();
-      return allCommands()
-        .filter((c) => !c.hidden && (!c.enabled || c.enabled()))
-        .map((c) => {
-          const label = `${c.category}: ${c.title}`;
-          const m = fuzzyMatch(query, label);
-          return m && { c, label, m };
-        })
-        .filter(Boolean)
-        .sort((a, b) => {
-          if (!query) {
-            const ra = recent.indexOf(a!.c.id);
-            const rb = recent.indexOf(b!.c.id);
-            if (ra !== rb) return (ra < 0 ? 999 : ra) - (rb < 0 ? 999 : rb);
-            return a!.label.localeCompare(b!.label);
-          }
-          return b!.m.score - a!.m.score;
-        })
-        .slice(0, 200)
-        .map(({ c, label, m }: any) => ({
-          key: c.id,
-          label,
-          keybinding: bindingFor(c.id),
-          positions: m.positions,
-          group: !query && recent.includes(c.id) ? "recently used" : undefined,
-          run: () => finish(() => runCommand(c.id)),
-        }));
+      const rank = (id: string) => {
+        const r = recent.indexOf(id);
+        return r < 0 ? 999 : r;
+      };
+      const scored: { c: Command; label: string; positions: number[]; score: number }[] = [];
+      for (const c of allCommands()) {
+        if (c.hidden || (c.enabled && !c.enabled())) continue;
+        const label = `${c.category}: ${c.title}`;
+        const m = fuzzyMatch(query, label);
+        if (m) scored.push({ c, label, positions: m.positions, score: m.score });
+      }
+      scored.sort((a, b) =>
+        query ? b.score - a.score : rank(a.c.id) - rank(b.c.id) || a.label.localeCompare(b.label),
+      );
+      return scored.slice(0, 200).map(({ c, label, positions }) => ({
+        key: c.id,
+        label,
+        keybinding: bindingFor(c.id),
+        positions,
+        group: !query && recent.includes(c.id) ? "recently used" : undefined,
+        run: () => finish(() => runCommand(c.id)),
+      }));
     }
     if (mode === "line") {
       const editor = getActiveEditor();

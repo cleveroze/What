@@ -21,7 +21,7 @@ function Toggle({ icon, label, active, onClick }: { icon: string; label: string;
 /** Renders a preview line with highlighted match ranges (UTF-16 offsets). */
 function Preview({ text, ranges, replace }: { text: string; ranges: [number, number][]; replace: string | null }) {
   const [firstStart] = ranges[0];
-  const offset = firstStart > 40 ? firstStart - 30 : 0;
+  const offset = firstStart > 16 ? firstStart - 12 : 0;
   const parts: React.ReactNode[] = [];
   let pos = offset;
   if (offset > 0) parts.push("…");

@@ -524,3 +524,14 @@ kbd {
     transform: translateX(340%);
   }
 }
+
+/* Composite fields draw their own focus ring. */
+.input-box input:focus-visible,
+.input-box textarea:focus-visible,
+.palette-input input:focus-visible,
+.text-field:focus-visible,
+.number-field input:focus-visible,
+.css-editor:focus-visible,
+.tree-edit input:focus-visible {
+  outline: none;
+}

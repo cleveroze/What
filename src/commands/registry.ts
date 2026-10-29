@@ -96,13 +96,27 @@ function inMonaco(target: EventTarget | null) {
   return target instanceof Element && !!target.closest(".monaco-editor");
 }
 
+function inTerminal(target: EventTarget | null) {
+  return target instanceof Element && !!target.closest(".xterm");
+}
+
+/** Workbench commands that still work while the terminal has focus; every
+ * other key goes to the shell (so e.g. Ctrl+R reaches its history search). */
+const TERMINAL_COMMANDS = /^(terminal\.|workbench\.(commandPalette|quickOpen)|view\.(toggle(Panel|Sidebar)|nextEditor|prevEditor|fullscreen|zoom|maximizePanel)|settings\.open$)/;
+
 function onKeyDown(e: KeyboardEvent) {
   if (keybindingStore.get().recording || e.isComposing) return;
   const chord = keyFromEvent(e);
   if (!chord) return;
+  const terminal = inTerminal(e.target);
   const candidates = allCommands().filter((c) => {
-    if (c.editorNative) return false;
-    return !!bindingFor(c.id);
+    const binding = bindingFor(c.id);
+    if (!binding) return false;
+    if (terminal && !TERMINAL_COMMANDS.test(c.id)) return false;
+    // Monaco handles its single-key bindings itself, but chords starting with
+    // a prefix we also use (Ctrl+K …) must be dispatched here.
+    if (c.editorNative) return binding.includes(" ");
+    return true;
   });
   const full = pendingChord ? `${pendingChord} ${chord}` : chord;
   const match = candidates.find((c) => bindingFor(c.id) === full);
@@ -126,7 +140,7 @@ function onKeyDown(e: KeyboardEvent) {
   }
   // Block WebView accelerators that would break the desktop illusion
   // (print, reload, browser find) when nothing else handles them.
-  if (!inMonaco(e.target) && ["ctrl+p", "ctrl+r", "f5", "ctrl+shift+r", "ctrl+f", "ctrl+g", "ctrl+u"].includes(chord)) {
+  if (!inMonaco(e.target) && !terminal && ["ctrl+p", "ctrl+r", "f5", "ctrl+shift+r", "ctrl+f", "ctrl+g", "ctrl+u"].includes(chord)) {
     e.preventDefault();
   }
 }
