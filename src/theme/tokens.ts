@@ -20,6 +20,8 @@ export interface SyntaxColors {
 
 export interface ThemeTokens {
   dark: boolean;
+  /** No hue in syntax colors; emphasis comes from weight instead. */
+  monochrome: boolean;
   bg: string;
   surface: string;
   editor: string;
@@ -129,7 +131,8 @@ export function computeTokens({ preset, dark, accent, background, surface }: The
     operator: textMuted,
     comment: ensureContrast(n(dark ? 0.6 : 0.58, 1.2), editor, 3.2),
   };
-  if (sc === 0 && !(accent && isHex(accent))) {
+  const monochrome = sc === 0 && !(accent && isHex(accent));
+  if (monochrome) {
     // Monochrome: vary tone instead of hue.
     syntax.string = ensureContrast(n(dark ? 0.72 : 0.42, 0), editor, 4.5);
     syntax.number = syntax.constant = ensureContrast(n(dark ? 0.8 : 0.36, 0), editor, 4.5);
@@ -150,6 +153,7 @@ export function computeTokens({ preset, dark, accent, background, surface }: The
 
   return {
     dark,
+    monochrome,
     bg,
     surface: surfaceC,
     editor,

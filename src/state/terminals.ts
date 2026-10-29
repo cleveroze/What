@@ -175,6 +175,7 @@ export function mountTerminal(id: string, container: HTMLElement) {
     rt.starting = true;
     nativeTerminal
       .spawn(session.shell, session.cwd, rt.term.cols, rt.term.rows, (ev) => {
+        if (!runtimes.has(id)) return; // closed while output was in flight
         if (ev.kind === "data") {
           rt.term.write(ev.data);
         } else {

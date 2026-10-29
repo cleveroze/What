@@ -77,11 +77,10 @@ export function Tabs() {
     if (!d) return;
     const dx = e.clientX - d.startX;
     if (!d.active && Math.abs(dx) < 5) return;
-    const self = d.rects[d.from];
-    const center = self.left + self.width / 2 + dx;
+    // Insert where the pointer is, relative to the other tabs' centers.
     let to = 0;
     d.rects.forEach((r, j) => {
-      if (j !== d.from && r.left + r.width / 2 < center) to++;
+      if (j !== d.from && r.left + r.width / 2 < e.clientX) to++;
     });
     setDrag({ ...d, dx, to, active: true });
   };

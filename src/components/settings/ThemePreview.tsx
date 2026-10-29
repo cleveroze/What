@@ -76,7 +76,18 @@ export function ThemePreview({ tokens, settings, compact = false }: { tokens: Th
                 <span className="pv-ln">{i + 1}</span>
                 <span>
                   {line.map(([text, kind], j) => (
-                    <span key={j} style={kind ? { color: tokens.syntax[kind], fontStyle: kind === "comment" ? "italic" : undefined } : undefined}>
+                    <span
+                      key={j}
+                      style={
+                        kind
+                          ? {
+                              color: tokens.syntax[kind],
+                              fontStyle: kind === "comment" ? "italic" : undefined,
+                              fontWeight: tokens.monochrome && (kind === "keyword" || kind === "control") ? 700 : undefined,
+                            }
+                          : undefined
+                      }
+                    >
                       {text}
                     </span>
                   ))}

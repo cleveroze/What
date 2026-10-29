@@ -57,6 +57,7 @@ const strip = (hex: string) => hex.replace("#", "");
 export function defineVersoTheme(t: ThemeTokens) {
   const s = t.syntax;
   const rule = (token: string, fg: string, fontStyle?: string) => ({ token, foreground: strip(fg), fontStyle });
+  const strong = t.monochrome ? "bold" : undefined;
   monaco.editor.defineTheme("verso", {
     base: t.dark ? "vs-dark" : "vs",
     inherit: true,
@@ -64,10 +65,10 @@ export function defineVersoTheme(t: ThemeTokens) {
       rule("", t.text),
       rule("comment", s.comment, "italic"),
       rule("comment.doc", s.comment, "italic"),
-      rule("keyword", s.keyword),
-      rule("keyword.control", s.control),
-      rule("keyword.flow", s.control),
-      rule("storage", s.keyword),
+      rule("keyword", s.keyword, strong),
+      rule("keyword.control", s.control, strong),
+      rule("keyword.flow", s.control, strong),
+      rule("storage", s.keyword, strong),
       rule("string", s.string),
       rule("string.escape", s.regexp),
       rule("string.key.json", s.property),
@@ -81,7 +82,7 @@ export function defineVersoTheme(t: ThemeTokens) {
       rule("function", s.function),
       rule("delimiter", s.operator),
       rule("operator", s.operator),
-      rule("tag", s.tag),
+      rule("tag", s.tag, strong),
       rule("metatag", s.tag),
       rule("attribute.name", s.attribute),
       rule("attribute.value", s.string),

@@ -72,6 +72,14 @@ const closedStack: string[] = [];
 let untitledCounter = 0;
 let activeEditor: monaco.editor.IStandaloneCodeEditor | null = null;
 let pendingReveal: { docId: string; range: monaco.IRange; focus: boolean } | null = null;
+/** Whether activating a document should move keyboard focus into the editor. */
+const focusRequests = new Map<string, boolean>();
+
+export function takeFocusRequest(docId: string): boolean {
+  const f = focusRequests.get(docId);
+  focusRequests.delete(docId);
+  return f ?? true;
+}
 
 // ---------- Accessors ----------
 
@@ -220,6 +228,7 @@ const opening = new Map<string, Promise<DocMeta | null>>();
 export async function openFile(path: string, opts: OpenOptions = {}): Promise<DocMeta | null> {
   const existing = findDocByPath(path);
   if (existing) {
+    if (opts.focus === false) focusRequests.set(existing.id, false);
     if (!opts.background) activateTab(tabIdForDoc(existing.id));
     revealInDoc(existing.id, opts);
     return existing;
@@ -248,6 +257,7 @@ export async function openFile(path: string, opts: OpenOptions = {}): Promise<Do
         modelRev: 0,
       };
       editorStore.set((s) => ({ ...s, docs: { ...s.docs, [id]: doc } }));
+      if (opts.focus === false) focusRequests.set(id, false);
       const tab: Tab = { id: `tab-${id}`, kind: "doc", docId: id };
       if (opts.background) {
         editorStore.set((s) => ({ ...s, tabs: [...s.tabs, tab], activeTabId: s.activeTabId ?? tab.id }));

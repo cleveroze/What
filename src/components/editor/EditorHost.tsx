@@ -9,6 +9,7 @@ import {
   getViewState,
   setActiveEditor,
   setViewState,
+  takeFocusRequest,
   takePendingReveal,
 } from "../../state/editors";
 import { settingsStore } from "../../state/settings";
@@ -101,12 +102,13 @@ export function EditorHost({ visible }: { visible: boolean }) {
       const vs = getViewState(docId);
       if (vs) editor.restoreViewState(vs);
     }
+    const focus = takeFocusRequest(docId);
     const reveal = takePendingReveal(docId);
     if (reveal) {
       editor.setSelection(reveal.range);
       editor.revealRangeInCenter(reveal.range, monaco.editor.ScrollType.Immediate);
       if (reveal.focus) editor.focus();
-    } else {
+    } else if (focus) {
       editor.focus();
     }
   }, [activeDocKey]);

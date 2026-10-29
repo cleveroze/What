@@ -1,6 +1,7 @@
 import { createStore } from "../lib/store";
 import { keyFromEvent } from "../lib/keys";
 import { load, persist } from "../state/persist";
+import { dialogStore } from "../state/ui";
 
 export interface Command {
   id: string;
@@ -105,7 +106,7 @@ function inTerminal(target: EventTarget | null) {
 const TERMINAL_COMMANDS = /^(terminal\.|workbench\.(commandPalette|quickOpen)|view\.(toggle(Panel|Sidebar)|nextEditor|prevEditor|fullscreen|zoom|maximizePanel)|settings\.open$)/;
 
 function onKeyDown(e: KeyboardEvent) {
-  if (keybindingStore.get().recording || e.isComposing) return;
+  if (keybindingStore.get().recording || e.isComposing || dialogStore.get().dialog) return;
   const chord = keyFromEvent(e);
   if (!chord) return;
   const terminal = inTerminal(e.target);
