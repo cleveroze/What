@@ -119,6 +119,16 @@ kbd {
   animation-timing-function: var(--ease);
 }
 
+html.theme-animating *,
+html.theme-animating *::before,
+html.theme-animating *::after {
+  transition:
+    background-color var(--dur-3) var(--ease),
+    color var(--dur-3) var(--ease),
+    border-color var(--dur-3) var(--ease),
+    box-shadow var(--dur-3) var(--ease) !important;
+}
+
 [data-animation="off"] *,
 [data-animation="off"] *::before,
 [data-animation="off"] *::after {

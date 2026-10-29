@@ -34,8 +34,8 @@ import {
   closeTerminal,
   createTerminal,
   ensureTerminal,
-  focusTerminal,
   loadShells,
+  requestTerminalFocus,
   sendToTerminal,
   terminalStore,
 } from "../state/terminals";
@@ -237,7 +237,7 @@ async function toggleTerminal() {
   }
   showPanel("terminal");
   await ensureTerminal();
-  setTimeout(() => focusTerminal(), 30);
+  requestTerminalFocus();
 }
 
 async function revertFile() {

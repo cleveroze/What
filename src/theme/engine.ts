@@ -131,6 +131,9 @@ function applyCustomCss(css: string) {
 }
 
 let lastThemeKey = "";
+let themeAnimTimer: ReturnType<typeof setTimeout> | undefined;
+// View Transitions are only used on Chromium (WebView2), where they are stable.
+const CHROMIUM = /Chrome\//.test(navigator.userAgent);
 
 function apply(s: Settings, animate: boolean) {
   const tokens = tokensFor(s);
@@ -146,8 +149,17 @@ function apply(s: Settings, animate: boolean) {
     lastThemeKey = key;
   };
   const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
-  if (animate && key !== lastThemeKey && lastThemeKey && s["ui.animation"] !== "off" && doc.startViewTransition) {
+  const themeChanged = animate && key !== lastThemeKey && !!lastThemeKey && s["ui.animation"] !== "off";
+  if (themeChanged && doc.startViewTransition && CHROMIUM) {
+    // WebView2: cross-fade the whole window between the old and new theme.
     doc.startViewTransition(commit);
+  } else if (themeChanged) {
+    // Other engines: transition colors on every element instead.
+    const root = document.documentElement;
+    root.classList.add("theme-animating");
+    commit();
+    clearTimeout(themeAnimTimer);
+    themeAnimTimer = setTimeout(() => root.classList.remove("theme-animating"), 400);
   } else {
     commit();
   }

@@ -33,6 +33,8 @@ interface TermRuntime {
   el: HTMLDivElement;
   opened: boolean;
   starting: boolean;
+  /** Move keyboard focus into the terminal the next time it is mounted. */
+  focusOnMount: boolean;
 }
 
 const runtimes = new Map<string, TermRuntime>();
@@ -86,13 +88,13 @@ export function defaultShell(shells: ShellInfo[]): ShellInfo | undefined {
 let ensuring: Promise<void> | null = null;
 
 /** Creates a terminal only if none exists (idempotent while one is starting). */
-export function ensureTerminal(): Promise<void> {
+export function ensureTerminal(focus = true): Promise<void> {
   if (terminalStore.get().sessions.length) return Promise.resolve();
-  ensuring ??= createTerminal().finally(() => (ensuring = null));
+  ensuring ??= createTerminal(undefined, undefined, focus).finally(() => (ensuring = null));
   return ensuring;
 }
 
-export async function createTerminal(shellId?: string, cwd?: string | null) {
+export async function createTerminal(shellId?: string, cwd?: string | null, focus = true) {
   const shells = await loadShells();
   const shell = (shellId && shells.find((s) => s.id === shellId)) || defaultShell(shells);
   if (!shell) {
@@ -116,7 +118,7 @@ export async function createTerminal(shellId?: string, cwd?: string | null) {
   term.loadAddon(fit);
   const el = document.createElement("div");
   el.className = "terminal-host";
-  runtimes.set(id, { term, fit, el, opened: false, starting: false });
+  runtimes.set(id, { term, fit, el, opened: false, starting: false, focusOnMount: focus });
 
   term.attachCustomKeyEventHandler((e) => {
     if (e.type !== "keydown") return true;
@@ -170,6 +172,10 @@ export function mountTerminal(id: string, container: HTMLElement) {
     rt.opened = true;
   }
   fitTerminal(id);
+  if (rt.focusOnMount) {
+    rt.focusOnMount = false;
+    rt.term.focus();
+  }
   const session = getSession(id);
   if (session && session.ptyId === null && !session.exited && !rt.starting) {
     rt.starting = true;
@@ -211,7 +217,18 @@ export function focusTerminal(id: string | null = terminalStore.get().activeId) 
   if (id) runtimes.get(id)?.term.focus();
 }
 
+/** Focuses the active terminal now, or as soon as it is mounted. */
+export function requestTerminalFocus() {
+  const id = terminalStore.get().activeId;
+  const rt = id ? runtimes.get(id) : undefined;
+  if (!rt) return;
+  if (rt.opened && rt.el.isConnected) rt.term.focus();
+  else rt.focusOnMount = true;
+}
+
 export function setActiveTerminal(id: string) {
+  const rt = runtimes.get(id);
+  if (rt) rt.focusOnMount = true;
   terminalStore.update({ activeId: id });
 }
 

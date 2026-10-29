@@ -16,7 +16,6 @@ export function TerminalView({ visible }: { visible: boolean }) {
       if (child.classList.contains("terminal-host")) child.remove();
     }
     mountTerminal(activeId, ref.current);
-    focusTerminal(activeId);
   }, [activeId, visible]);
 
   useEffect(() => {
@@ -37,7 +36,8 @@ export function TerminalView({ visible }: { visible: boolean }) {
   // Wait for session restore so the shell starts in the workspace folder.
   const ready = useStore(workspaceStore, (s) => s.ready);
   useEffect(() => {
-    if (visible && ready) ensureTerminal();
+    // Restored or tab-switched panels shouldn't steal focus from the editor.
+    if (visible && ready) ensureTerminal(false);
   }, [visible, ready]);
 
   return (
