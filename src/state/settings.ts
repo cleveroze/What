@@ -2,11 +2,13 @@ import { createStore } from "../lib/store";
 import { persist } from "./persist";
 
 export type ThemeMode = "system" | "light" | "dark";
-export type PresetId = "cream" | "graphite" | "ocean" | "forest" | "monochrome";
+/** Built-in presets, or a theme contributed by an extension. */
+export type PresetId = "cream" | "graphite" | "ocean" | "forest" | "monochrome" | (string & {});
 export type Density = "compact" | "default" | "comfortable";
 export type Animation = "off" | "reduced" | "normal";
 export type IconTheme = "color" | "mono" | "minimal";
-export type ActivityItemId = "explorer" | "search" | "terminal" | "problems" | "settings";
+export type ActivityItemId = "explorer" | "search" | "assistant" | "extensions" | "terminal" | "problems" | "settings";
+export type AiProvider = "anthropic" | "openrouter" | "custom";
 
 export interface Settings {
   // General
@@ -75,6 +77,15 @@ export interface Settings {
   // Search
   "search.exclude": string;
   "search.maxResults": number;
+  // AI assistant (API keys live in a separate secrets file)
+  "ai.provider": AiProvider;
+  "ai.anthropicModel": string;
+  "ai.openrouterModel": string;
+  "ai.customBaseUrl": string;
+  "ai.customModel": string;
+  "ai.includeFile": boolean;
+  // Extensions
+  "extensions.disabled": string[];
   // Terminal
   "terminal.shell": string;
   "terminal.fontFamily": string;
@@ -108,7 +119,7 @@ export const DEFAULT_SETTINGS: Settings = {
   "layout.sidebarPosition": "left",
   "layout.activityBarVisible": true,
   "layout.activityBarPosition": "side",
-  "layout.activityItems": ["explorer", "search", "terminal", "problems", "settings"],
+  "layout.activityItems": ["explorer", "search", "assistant", "extensions", "terminal", "problems", "settings"],
   "layout.hiddenActivityItems": [],
   "layout.statusBarVisible": true,
   "layout.breadcrumbs": true,
@@ -148,6 +159,13 @@ export const DEFAULT_SETTINGS: Settings = {
   "files.confirmDragAndDrop": true,
   "search.exclude": "node_modules, dist, build, target, *.min.js, *.lock",
   "search.maxResults": 5000,
+  "ai.provider": "anthropic",
+  "ai.anthropicModel": "claude-opus-5-5",
+  "ai.openrouterModel": "",
+  "ai.customBaseUrl": "http://localhost:11434/v1",
+  "ai.customModel": "",
+  "ai.includeFile": true,
+  "extensions.disabled": [],
   "terminal.shell": "",
   "terminal.fontFamily": '"Cascadia Mono", "Cascadia Code", Consolas, monospace',
   "terminal.fontSize": 13,

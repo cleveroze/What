@@ -1,0 +1,33 @@
+{
+  "manifest": {
+    "id": "json-tools",
+    "name": "JSON Tools",
+    "version": "1.0.0",
+    "description": "Format, minify and sort the keys of JSON — the whole file or just the selection. Tells you exactly where invalid JSON breaks.",
+    "author": "Stride",
+    "icon": "gem",
+    "categories": [
+      "Formatters"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "format",
+          "title": "Format JSON"
+        },
+        {
+          "id": "minify",
+          "title": "Minify JSON"
+        },
+        {
+          "id": "sortKeys",
+          "title": "Sort JSON Keys"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "async function transform(fn) {\n  const selected = await stride.editor.getSelectedText();\n  const text = selected || (await stride.editor.getText());\n  let data;\n  try {\n    data = JSON.parse(text);\n  } catch (e) {\n    return stride.window.showMessage(`That isn't valid JSON: ${e.message}`, \"error\");\n  }\n  const out = fn(data);\n  if (selected) await stride.editor.replaceSelection(out);\n  else await stride.editor.setText(out);\n}\n\nconst sortDeep = (v) =>\n  Array.isArray(v) ? v.map(sortDeep) :\n  v && typeof v === \"object\" ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortDeep(v[k])])) : v;\n\nstride.commands.register(\"format\", () => transform((d) => JSON.stringify(d, null, 2)));\nstride.commands.register(\"minify\", () => transform((d) => JSON.stringify(d)));\nstride.commands.register(\"sortKeys\", () => transform((d) => JSON.stringify(sortDeep(d), null, 2)));\n"
+  }
+}

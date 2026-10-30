@@ -1,0 +1,17 @@
+{
+  "id": "json-tools",
+  "name": "JSON Tools",
+  "version": "1.0.0",
+  "description": "Format, minify and sort the keys of JSON — the whole file or just the selection. Tells you exactly where invalid JSON breaks.",
+  "author": "Stride",
+  "icon": "gem",
+  "categories": ["Formatters"],
+  "main": "main.js",
+  "contributes": {
+    "commands": [
+      { "id": "format", "title": "Format JSON" },
+      { "id": "minify", "title": "Minify JSON" },
+      { "id": "sortKeys", "title": "Sort JSON Keys" }
+    ]
+  }
+}

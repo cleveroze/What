@@ -1,0 +1,71 @@
+{
+  "id": "html-snippets",
+  "name": "HTML Starter Snippets",
+  "version": "1.0.0",
+  "description": "Type a shortcut like “html5” or “card” in an HTML file and press Enter to get a ready-made block. Example of a snippets extension.",
+  "author": "Stride",
+  "icon": "pentagon",
+  "categories": ["Snippets"],
+  "contributes": {
+    "snippets": [
+      {
+        "language": "html",
+        "prefix": "html5",
+        "description": "HTML page with CSS and JS",
+        "body": [
+          "<!doctype html>",
+          "<html lang=\"${1:en}\">",
+          "<head>",
+          "  <meta charset=\"utf-8\">",
+          "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+          "  <title>${2:My page}</title>",
+          "  <link rel=\"stylesheet\" href=\"style.css\">",
+          "</head>",
+          "<body>",
+          "  <h1>${2:My page}</h1>",
+          "  $0",
+          "  <script src=\"app.js\"></script>",
+          "</body>",
+          "</html>"
+        ]
+      },
+      {
+        "language": "html",
+        "prefix": "card",
+        "description": "Card with image, title and button",
+        "body": [
+          "<article class=\"card\">",
+          "  <img src=\"${1:image.jpg}\" alt=\"${2:Description}\">",
+          "  <h2>${3:Title}</h2>",
+          "  <p>${4:Some text}</p>",
+          "  <button>${5:Read more}</button>",
+          "</article>"
+        ]
+      },
+      {
+        "language": "html",
+        "prefix": "form",
+        "description": "Form with a text field and submit button",
+        "body": [
+          "<form>",
+          "  <label for=\"${1:name}\">${2:Name}</label>",
+          "  <input id=\"${1:name}\" name=\"${1:name}\" type=\"text\" required>",
+          "  <button type=\"submit\">${3:Send}</button>",
+          "</form>"
+        ]
+      },
+      {
+        "language": "html",
+        "prefix": "nav",
+        "description": "Navigation menu",
+        "body": [
+          "<nav>",
+          "  <a href=\"${1:#}\">${2:Home}</a>",
+          "  <a href=\"${3:#about}\">${4:About}</a>",
+          "  <a href=\"${5:#contact}\">${6:Contact}</a>",
+          "</nav>"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "manifest": {
+    "id": "lorem-ipsum",
+    "name": "Lorem Ipsum",
+    "version": "1.0.0",
+    "description": "Inserts placeholder text — as many words, sentences or paragraphs as you ask for. Handy for web page mockups.",
+    "author": "Stride",
+    "icon": "puffy",
+    "categories": [
+      "Tools",
+      "Fun"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "insert",
+          "title": "Insert Placeholder Text…"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "const WORDS = (\"lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna \" +\n  \"aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure \" +\n  \"in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa \" +\n  \"qui officia deserunt mollit anim id est laborum\").split(\" \");\n\nconst pick = () => WORDS[Math.floor(Math.random() * WORDS.length)];\nconst sentence = () => {\n  const n = 6 + Math.floor(Math.random() * 10);\n  const s = Array.from({ length: n }, pick).join(\" \");\n  return s.charAt(0).toUpperCase() + s.slice(1) + \".\";\n};\nconst paragraph = () => Array.from({ length: 3 + Math.floor(Math.random() * 4) }, sentence).join(\" \");\n\nstride.commands.register(\"insert\", async () => {\n  const kind = await stride.window.showQuickPick([\"Paragraphs\", \"Sentences\", \"Words\"], \"What should I insert?\");\n  if (!kind) return;\n  const raw = await stride.window.showInput(`How many ${kind.toLowerCase()}?`, kind === \"Words\" ? \"20\" : \"2\");\n  const n = Math.min(200, Math.max(1, parseInt(raw, 10) || 1));\n  const text =\n    kind === \"Paragraphs\" ? Array.from({ length: n }, paragraph).join(\"\\n\\n\") :\n    kind === \"Sentences\" ? Array.from({ length: n }, sentence).join(\" \") :\n    [\"Lorem\", ...Array.from({ length: n - 1 }, pick)].join(\" \");\n  await stride.editor.insertText(text);\n});\n"
+  }
+}

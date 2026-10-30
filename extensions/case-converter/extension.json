@@ -1,0 +1,13 @@
+{
+  "id": "case-converter",
+  "name": "Case Converter",
+  "version": "1.0.0",
+  "description": "Converts the selected text to camelCase, snake_case, kebab-case, PascalCase, UPPER or Title Case. Example of quick picks and editing the selection.",
+  "author": "Stride",
+  "icon": "clover4",
+  "categories": ["Tools"],
+  "main": "main.js",
+  "contributes": {
+    "commands": [{ "id": "convert", "title": "Convert Case of Selection…", "keybinding": "ctrl+alt+c" }]
+  }
+}

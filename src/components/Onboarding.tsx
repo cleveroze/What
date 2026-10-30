@@ -4,16 +4,16 @@ import type { ShapeName } from "../lib/shapes";
 import { useStore } from "../lib/store";
 import { onboardingStore } from "../state/ui";
 import { newUntitled } from "../state/editors";
-import { setSetting, settingsStore, type PresetId } from "../state/settings";
+import { setSetting, settingsStore } from "../state/settings";
 import { workspaceStore } from "../state/workspace";
 import { revealThemeFrom, tokensFor } from "../theme/engine";
-import { PRESETS } from "../theme/presets";
+import { presetsStore } from "../theme/presets";
 import { Icon } from "./Icon";
 import { MorphShape, Shape } from "./Shape";
 import { Button, Segmented, Slider, Switch } from "./ui/controls";
 
 const STEP_SHAPES: ShapeName[] = ["softBurst", "flower", "cookie9", "heart"];
-const PRESET_SHAPES: Record<PresetId, ShapeName> = {
+const PRESET_SHAPES: Record<string, ShapeName> = {
   cream: "cookie9",
   graphite: "gem",
   ocean: "clover4",
@@ -23,6 +23,7 @@ const PRESET_SHAPES: Record<PresetId, ShapeName> = {
 
 function LookStep() {
   const s = useStore(settingsStore, (x) => x);
+  const PRESETS = useStore(presetsStore, (x) => x.presets);
   return (
     <div className="ob-body">
       <h2>Pick your look</h2>
@@ -56,7 +57,7 @@ function LookStep() {
               }}
             >
               <span className="ob-preset-art" style={{ background: t.editor }}>
-                <MorphShape name={selected ? "softBurst" : PRESET_SHAPES[p.id]} size={46} fill={t.accent} spin={90} />
+                <MorphShape name={selected ? "softBurst" : PRESET_SHAPES[p.id] ?? "flower"} size={46} fill={t.accent} spin={90} />
                 <span className="ob-preset-lines">
                   <i style={{ background: t.syntax.keyword }} />
                   <i style={{ background: t.syntax.string }} />

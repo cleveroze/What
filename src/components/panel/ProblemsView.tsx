@@ -4,6 +4,8 @@ import { activateTab, getActiveEditor, revealInDoc, tabIdForDoc } from "../../st
 import { problemsStore, type Problem } from "../../state/problems";
 import { FileIcon } from "../FileIcon";
 import { EmptyState } from "../EmptyState";
+import { explainError } from "../../state/assistant";
+import { openContextMenu } from "../../state/ui";
 import { Icon } from "../Icon";
 
 function open(p: Problem) {
@@ -57,7 +59,19 @@ export function ProblemsView({ filter }: { filter: string }) {
           </button>
           {!collapsed[docId] &&
             g.items.map((p, i) => (
-              <button type="button" key={i} className="problem-row" onClick={() => open(p)}>
+              <button
+                type="button"
+                key={i}
+                className="problem-row"
+                onClick={() => open(p)}
+                onContextMenu={(e) =>
+                  openContextMenu(e, [
+                    { label: "Go to Problem", run: () => open(p) },
+                    { label: "Explain with AI", run: () => { open(p); explainError(`${p.message} (line ${p.line} of ${p.name})`); } },
+                    { label: "Copy Message", run: () => navigator.clipboard.writeText(p.message) },
+                  ])
+                }
+              >
                 <Icon name={p.severity} size={14} className={`sev-${p.severity}`} />
                 <span className="problem-msg">{p.message}</span>
                 {p.source && <span className="problem-src">{p.source}{p.code ? `(${p.code})` : ""}</span>}

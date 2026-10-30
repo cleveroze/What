@@ -1,0 +1,26 @@
+{
+  "manifest": {
+    "id": "line-tools",
+    "name": "Line Tools",
+    "version": "1.0.0",
+    "description": "Sort, reverse, shuffle, remove duplicates or empty lines, number or trim the lines of your selection (or the whole file).",
+    "author": "Stride",
+    "icon": "slanted",
+    "categories": [
+      "Tools"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "menu",
+          "title": "Line Tools…",
+          "keybinding": "ctrl+alt+l"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "const OPS = {\n  \"Sort A → Z\": (l) => [...l].sort((a, b) => a.localeCompare(b)),\n  \"Sort Z → A\": (l) => [...l].sort((a, b) => b.localeCompare(a)),\n  \"Sort by length\": (l) => [...l].sort((a, b) => a.length - b.length),\n  \"Reverse\": (l) => [...l].reverse(),\n  \"Shuffle\": (l) => l.map((x) => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map((x) => x[1]),\n  \"Remove duplicates\": (l) => [...new Set(l)],\n  \"Remove empty lines\": (l) => l.filter((x) => x.trim()),\n  \"Trim spaces\": (l) => l.map((x) => x.trim()),\n  \"Number lines\": (l) => l.map((x, i) => `${i + 1}. ${x}`),\n};\n\nstride.commands.register(\"menu\", async () => {\n  const selected = await stride.editor.getSelectedText();\n  const text = selected || (await stride.editor.getText());\n  const op = await stride.window.showQuickPick(Object.keys(OPS), selected ? \"Apply to selected lines\" : \"Apply to the whole file\");\n  if (!op) return;\n  const eol = text.includes(\"\\r\\n\") ? \"\\r\\n\" : \"\\n\";\n  const result = OPS[op](text.split(/\\r?\\n/)).join(eol);\n  if (selected) await stride.editor.replaceSelection(result);\n  else await stride.editor.setText(result);\n});\n"
+  }
+}

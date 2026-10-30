@@ -13,6 +13,7 @@ import {
   takePendingReveal,
 } from "../../state/editors";
 import { settingsStore } from "../../state/settings";
+import { addComments, explainCode, findBugs, focusAssistant } from "../../state/assistant";
 
 /** Hosts the single Monaco editor instance; switching tabs swaps models while
  * preserving each document's cursor, scroll and folding state. */
@@ -34,6 +35,14 @@ export function EditorHost({ visible }: { visible: boolean }) {
     });
     editorRef.current = editor;
     setActiveEditor(editor);
+
+    // AI actions in the editor's right-click menu.
+    const aiActions = [
+      { id: "stride.ai.explain", label: "AI: Explain This Code", run: explainCode },
+      { id: "stride.ai.bugs", label: "AI: Find Bugs", run: findBugs },
+      { id: "stride.ai.comments", label: "AI: Add Comments", run: addComments },
+      { id: "stride.ai.ask", label: "AI: Ask About This…", run: focusAssistant },
+    ].map((a, i) => editor.addAction({ id: a.id, label: a.label, contextMenuGroupId: "0_ai", contextMenuOrder: i, run: () => void a.run() }));
 
     const updateCursor = () => {
       const model = editor.getModel();
@@ -71,6 +80,7 @@ export function EditorHost({ visible }: { visible: boolean }) {
       }
     });
     return () => {
+      aiActions.forEach((a) => a.dispose());
       unsub();
       ro.disconnect();
       d1.dispose();

@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { inputBoxStore } from "../extensions/host";
 import { useStore } from "../lib/store";
 import { closeContextMenu, contextMenuStore, dialogStore, dismissToast, toastStore } from "../state/ui";
 import type { ShapeName } from "../lib/shapes";
@@ -77,6 +78,53 @@ export function DialogHost() {
               {b.label}
             </button>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Text prompt used by extensions (`stride.window.showInput`). */
+export function InputBoxHost() {
+  const box = useStore(inputBoxStore, (s) => s.box);
+  const [value, setValue] = useState("");
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!box) return;
+    setValue(box.value);
+    requestAnimationFrame(() => ref.current?.select());
+  }, [box]);
+  if (!box) return null;
+  return (
+    <div className="palette-scrim" onPointerDown={(e) => e.target === e.currentTarget && box.resolve(null)}>
+      <div className="palette input-box-dialog" role="dialog" aria-label={box.title}>
+        <div className="input-box-title">
+          <Icon name="puzzle" size={14} /> {box.title}
+        </div>
+        <div className="palette-input">
+          <input
+            ref={ref}
+            value={value}
+            placeholder={box.prompt}
+            aria-label={box.prompt}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") box.resolve(value);
+              if (e.key === "Escape") {
+                e.stopPropagation();
+                box.resolve(null);
+              }
+            }}
+          />
+        </div>
+        <div className="palette-footer">
+          <span>{box.prompt}</span>
+          <span>
+            <kbd>Enter</kbd> OK
+          </span>
+          <span>
+            <kbd>Esc</kbd> cancel
+          </span>
         </div>
       </div>
     </div>

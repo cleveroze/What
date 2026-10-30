@@ -1,0 +1,82 @@
+{
+  "manifest": {
+    "id": "python-snippets",
+    "name": "Python Starter Snippets",
+    "version": "1.0.0",
+    "description": "Shortcuts for common Python code: main block, functions, classes, loops, file reading and input. Type the shortcut and press Enter.",
+    "author": "Stride",
+    "icon": "pill",
+    "categories": [
+      "Snippets"
+    ],
+    "contributes": {
+      "snippets": [
+        {
+          "language": "python",
+          "prefix": "main",
+          "description": "if __name__ == \"__main__\"",
+          "body": [
+            "def main():",
+            "    ${1:pass}",
+            "",
+            "",
+            "if __name__ == \"__main__\":",
+            "    main()"
+          ]
+        },
+        {
+          "language": "python",
+          "prefix": "def",
+          "description": "Function with docstring",
+          "body": [
+            "def ${1:name}(${2:args}):",
+            "    \"\"\"${3:What it does.}\"\"\"",
+            "    ${0:pass}"
+          ]
+        },
+        {
+          "language": "python",
+          "prefix": "class",
+          "description": "Class with constructor",
+          "body": [
+            "class ${1:Name}:",
+            "    def __init__(self, ${2:value}):",
+            "        self.${2:value} = ${2:value}",
+            "",
+            "    def __repr__(self):",
+            "        return f\"${1:Name}({self.${2:value}!r})\""
+          ]
+        },
+        {
+          "language": "python",
+          "prefix": "forr",
+          "description": "for loop over range",
+          "body": [
+            "for ${1:i} in range(${2:10}):",
+            "    ${0:print(${1:i})}"
+          ]
+        },
+        {
+          "language": "python",
+          "prefix": "readfile",
+          "description": "Read a text file line by line",
+          "body": [
+            "with open(\"${1:file.txt}\", encoding=\"utf-8\") as f:",
+            "    for line in f:",
+            "        ${0:print(line.rstrip())}"
+          ]
+        },
+        {
+          "language": "python",
+          "prefix": "ask",
+          "description": "Ask the user for a number",
+          "body": [
+            "${1:age} = int(input(\"${2:How old are you? }\"))",
+            "$0"
+          ]
+        }
+      ]
+    }
+  },
+  "files": {}
+}

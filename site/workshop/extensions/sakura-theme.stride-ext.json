@@ -1,0 +1,28 @@
+{
+  "manifest": {
+    "id": "sakura-theme",
+    "name": "Sakura Theme",
+    "version": "1.0.0",
+    "description": "Soft cherry-blossom pinks for light and dark mode. Example of a theme extension — no code needed, just a few numbers.",
+    "author": "Stride",
+    "icon": "flower",
+    "categories": [
+      "Themes"
+    ],
+    "contributes": {
+      "themes": [
+        {
+          "id": "sakura",
+          "name": "Sakura",
+          "description": "Cherry-blossom pinks",
+          "neutralHue": 350,
+          "neutralChroma": 0.018,
+          "accentHue": 355,
+          "accentChroma": 0.14,
+          "syntaxChroma": 0.11
+        }
+      ]
+    }
+  },
+  "files": {}
+}

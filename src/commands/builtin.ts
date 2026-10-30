@@ -27,6 +27,7 @@ import {
   setDocLanguage,
 } from "../state/editors";
 import { requestExit } from "../state/lifecycle";
+import { addComments, explainCode, findBugs, fixProblems, focusAssistant, newChat, writeTests } from "../state/assistant";
 import { closePreview, openInBrowser, openPreview, runActiveFile } from "../state/run";
 import { clearOutput } from "../state/output";
 import { getSetting, setSetting, type Density, type ThemeMode } from "../state/settings";
@@ -54,7 +55,7 @@ import {
   showSidebarView,
   workspaceStore,
 } from "../state/workspace";
-import { PRESETS } from "../theme/presets";
+import { allPresets } from "../theme/presets";
 import { registerCommands, type Command } from "./registry";
 import { focusSearchInput } from "../state/search";
 
@@ -176,7 +177,7 @@ async function changeIndentation() {
 
 async function selectPreset() {
   const id = await quickPick(
-    PRESETS.map((p) => ({
+    allPresets().map((p) => ({
       label: p.name,
       description: p.id === getSetting("theme.preset") ? "current" : p.description,
       value: p.id,
@@ -533,6 +534,17 @@ export function registerBuiltinCommands() {
     { id: "editor.changeEncoding", title: "Change File Encoding…", category: "Editor", run: changeEncoding },
     { id: "editor.changeEol", title: "Change End of Line Sequence…", category: "Editor", run: changeEol },
     { id: "editor.changeIndentation", title: "Change Indentation…", category: "Editor", run: changeIndentation },
+
+    // ----- AI -----
+    { id: "ai.open", title: "Open AI Assistant", category: "AI", keybinding: "ctrl+shift+a", run: focusAssistant },
+    { id: "ai.newChat", title: "New AI Chat", category: "AI", run: newChat },
+    { id: "ai.explain", title: "Explain This Code", category: "AI", run: explainCode },
+    { id: "ai.findBugs", title: "Find Bugs in This File", category: "AI", run: findBugs },
+    { id: "ai.fixProblems", title: "Explain and Fix Problems", category: "AI", run: fixProblems },
+    { id: "ai.addComments", title: "Add Comments", category: "AI", run: addComments },
+    { id: "ai.writeTests", title: "Write Tests", category: "AI", run: writeTests },
+    { id: "ai.settings", title: "AI Settings (Provider, Key, Model)", category: "AI", run: () => openSettingsTab("ai") },
+    { id: "extensions.open", title: "Show Extensions", category: "Extensions", keybinding: "ctrl+shift+x", run: () => showSidebarView("extensions") },
 
     // ----- Run -----
     { id: "run.file", title: "Run File", category: "Run", keybinding: "f5", run: runActiveFile },

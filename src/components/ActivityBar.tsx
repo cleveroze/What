@@ -13,10 +13,14 @@ import { MorphShape, Shape } from "./Shape";
 const ITEMS: Record<ActivityItemId, { label: string; icon: string; command: string; shape: ShapeName; desc: string }> = {
   explorer: { label: "Explorer", icon: "files", command: "view.explorer", shape: "cookie9", desc: "Browse, create and rename the files of your project." },
   search: { label: "Search", icon: "search", command: "edit.findInFiles", shape: "clover4", desc: "Find (and replace) text across every file in the folder." },
+  assistant: { label: "AI Assistant", icon: "sparkle", command: "ai.open", shape: "sunny", desc: "Chat with AI about your code: explanations, bug hunting, fixes. Works with Claude, OpenRouter or a local model." },
+  extensions: { label: "Extensions", icon: "puzzle", command: "extensions.open", shape: "flower", desc: "Add new features, themes and snippets from the Workshop — or build your own." },
   terminal: { label: "Terminal", icon: "terminal", command: "terminal.toggle", shape: "pill", desc: "Run commands in PowerShell or CMD without leaving Stride." },
   problems: { label: "Problems", icon: "problems", command: "view.problems", shape: "softBurst", desc: "Errors and warnings found in your open files." },
   settings: { label: "Settings", icon: "settings", command: "settings.open", shape: "flower", desc: "Themes, fonts, shortcuts and everything else." },
 };
+
+const SIDEBAR_ITEMS: ActivityItemId[] = ["explorer", "search", "assistant", "extensions"];
 
 export const ACTIVITY_LABELS = Object.fromEntries(Object.entries(ITEMS).map(([k, v]) => [k, v.label])) as Record<ActivityItemId, string>;
 
@@ -26,6 +30,10 @@ function activate(id: ActivityItemId) {
       return showSidebarView("explorer", true);
     case "search":
       return showSidebarView("search", true);
+    case "assistant":
+      return showSidebarView("assistant", true);
+    case "extensions":
+      return showSidebarView("extensions", true);
     case "terminal":
       return runCommand("terminal.toggle");
     case "problems":
@@ -45,12 +53,12 @@ export function ActivityBar({ horizontal }: { horizontal: boolean }) {
   const items = order.filter((i) => !hidden.includes(i));
 
   const isActive = (id: ActivityItemId) => {
-    if (id === "explorer" || id === "search") return layout.sidebarVisible && layout.sidebarView === id;
+    if (SIDEBAR_ITEMS.includes(id)) return layout.sidebarVisible && layout.sidebarView === id;
     if (id === "terminal" || id === "problems") return layout.panelVisible && layout.panelTab === id;
     return settingsActive;
   };
   // The sliding, morphing indicator follows the active side bar view.
-  const activeIndex = items.findIndex((i) => (i === "explorer" || i === "search") && isActive(i));
+  const activeIndex = items.findIndex((i) => SIDEBAR_ITEMS.includes(i) && isActive(i));
   const indicatorShape = activeIndex >= 0 ? ITEMS[items[activeIndex]].shape : "circle";
 
   const move = (id: ActivityItemId, delta: number) => {
@@ -98,7 +106,7 @@ export function ActivityBar({ horizontal }: { horizontal: boolean }) {
       {items.map((id) => {
         const item = ITEMS[id];
         const active = isActive(id);
-        const sidebarItem = id === "explorer" || id === "search";
+        const sidebarItem = SIDEBAR_ITEMS.includes(id);
         return (
           <button
             key={id}

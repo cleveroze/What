@@ -1,0 +1,11 @@
+{
+  "id": "base64-tools",
+  "name": "Encode / Decode",
+  "version": "1.0.0",
+  "description": "Base64 and URL encoding and decoding of the selected text (full Unicode support).",
+  "author": "Stride",
+  "icon": "bun",
+  "categories": ["Tools"],
+  "main": "main.js",
+  "contributes": { "commands": [{ "id": "menu", "title": "Encode / Decode Selection…" }] }
+}

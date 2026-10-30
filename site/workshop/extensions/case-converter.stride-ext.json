@@ -1,0 +1,26 @@
+{
+  "manifest": {
+    "id": "case-converter",
+    "name": "Case Converter",
+    "version": "1.0.0",
+    "description": "Converts the selected text to camelCase, snake_case, kebab-case, PascalCase, UPPER or Title Case. Example of quick picks and editing the selection.",
+    "author": "Stride",
+    "icon": "clover4",
+    "categories": [
+      "Tools"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "convert",
+          "title": "Convert Case of Selection…",
+          "keybinding": "ctrl+alt+c"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "// Case Converter — example extension.\n// Shows how to: ask the user to pick from a list and replace the selection.\n\nconst words = (s) =>\n  s\n    .replace(/([a-z0-9])([A-Z])/g, \"$1 $2\")\n    .split(/[^\\p{L}\\p{N}]+/u)\n    .filter(Boolean);\nconst cap = (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();\n\nconst CASES = {\n  \"camelCase\": (s) => words(s).map((w, i) => (i ? cap(w) : w.toLowerCase())).join(\"\"),\n  \"PascalCase\": (s) => words(s).map(cap).join(\"\"),\n  \"snake_case\": (s) => words(s).map((w) => w.toLowerCase()).join(\"_\"),\n  \"kebab-case\": (s) => words(s).map((w) => w.toLowerCase()).join(\"-\"),\n  \"CONSTANT_CASE\": (s) => words(s).map((w) => w.toUpperCase()).join(\"_\"),\n  \"Title Case\": (s) => words(s).map(cap).join(\" \"),\n  \"UPPERCASE\": (s) => s.toUpperCase(),\n  \"lowercase\": (s) => s.toLowerCase(),\n};\n\nstride.commands.register(\"convert\", async () => {\n  const text = await stride.editor.getSelectedText();\n  if (!text) return stride.window.showMessage(\"Select some text first.\", \"warning\");\n  const choice = await stride.window.showQuickPick(\n    Object.keys(CASES).map((name) => ({ label: name, description: CASES[name](text).slice(0, 40), value: name })),\n    \"Convert selection to…\",\n  );\n  if (choice) await stride.editor.replaceSelection(CASES[choice](text));\n});\n"
+  }
+}

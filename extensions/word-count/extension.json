@@ -1,0 +1,13 @@
+{
+  "id": "word-count",
+  "name": "Word Count",
+  "version": "1.0.0",
+  "description": "Shows words, characters and reading time of the open file in the status bar. A small example of status bar items and editor events.",
+  "author": "Stride",
+  "icon": "cookie4",
+  "categories": ["Tools"],
+  "main": "main.js",
+  "contributes": {
+    "commands": [{ "id": "details", "title": "Show Word Count Details" }]
+  }
+}

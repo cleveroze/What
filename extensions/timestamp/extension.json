@@ -1,0 +1,11 @@
+{
+  "id": "timestamp",
+  "name": "Timestamp",
+  "version": "1.0.0",
+  "description": "Inserts the current date and time in the format you pick: ISO 8601, Unix seconds, local date, and more.",
+  "author": "Stride",
+  "icon": "sunny",
+  "categories": ["Tools"],
+  "main": "main.js",
+  "contributes": { "commands": [{ "id": "insert", "title": "Insert Date / Time…", "keybinding": "ctrl+alt+d" }] }
+}

@@ -1,0 +1,45 @@
+{
+  "manifest": {
+    "id": "nature-themes",
+    "name": "Nature Themes",
+    "version": "1.0.0",
+    "description": "Three calm palettes: Dune (warm sand), Glacier (icy blue) and Plum (deep violet). Each works in light and dark mode.",
+    "author": "Stride",
+    "icon": "softBurst",
+    "categories": [
+      "Themes"
+    ],
+    "contributes": {
+      "themes": [
+        {
+          "id": "dune",
+          "name": "Dune",
+          "description": "Warm sand and sunset orange",
+          "neutralHue": 70,
+          "neutralChroma": 0.025,
+          "accentHue": 60,
+          "accentChroma": 0.13
+        },
+        {
+          "id": "glacier",
+          "name": "Glacier",
+          "description": "Icy blues with a crisp cyan accent",
+          "neutralHue": 225,
+          "neutralChroma": 0.02,
+          "accentHue": 215,
+          "accentChroma": 0.12
+        },
+        {
+          "id": "plum",
+          "name": "Plum",
+          "description": "Deep violet with a berry accent",
+          "neutralHue": 315,
+          "neutralChroma": 0.02,
+          "accentHue": 330,
+          "accentChroma": 0.13
+        }
+      ]
+    }
+  },
+  "files": {}
+}

@@ -1,7 +1,7 @@
 import { withAlpha } from "../lib/color";
 import { createStore } from "../lib/store";
 import { settingsStore, type Settings } from "../state/settings";
-import { presetById } from "./presets";
+import { presetById, presetsStore } from "./presets";
 import { computeTokens, type ThemeTokens } from "./tokens";
 
 const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
@@ -194,4 +194,6 @@ export function initThemeEngine() {
   apply(settingsStore.get(), false);
   settingsStore.subscribe(() => apply(settingsStore.get(), true));
   systemDark.addEventListener("change", () => apply(settingsStore.get(), true));
+  // Extension themes can appear after startup (the saved preset may be one).
+  presetsStore.subscribe(() => apply(settingsStore.get(), false));
 }

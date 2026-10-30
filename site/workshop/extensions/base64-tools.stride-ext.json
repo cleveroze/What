@@ -1,0 +1,25 @@
+{
+  "manifest": {
+    "id": "base64-tools",
+    "name": "Encode / Decode",
+    "version": "1.0.0",
+    "description": "Base64 and URL encoding and decoding of the selected text (full Unicode support).",
+    "author": "Stride",
+    "icon": "bun",
+    "categories": [
+      "Tools"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "menu",
+          "title": "Encode / Decode Selection…"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "const toB64 = (s) => btoa(String.fromCharCode(...new TextEncoder().encode(s)));\nconst fromB64 = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.trim()), (c) => c.charCodeAt(0)));\n\nconst OPS = {\n  \"Base64 encode\": toB64,\n  \"Base64 decode\": fromB64,\n  \"URL encode\": encodeURIComponent,\n  \"URL decode\": decodeURIComponent,\n};\n\nstride.commands.register(\"menu\", async () => {\n  const text = await stride.editor.getSelectedText();\n  if (!text) return stride.window.showMessage(\"Select some text first.\", \"warning\");\n  const op = await stride.window.showQuickPick(Object.keys(OPS), \"What should I do with the selection?\");\n  if (!op) return;\n  try {\n    await stride.editor.replaceSelection(OPS[op](text));\n  } catch (e) {\n    await stride.window.showMessage(`Couldn't ${op.toLowerCase()}: ${e.message}`, \"error\");\n  }\n});\n"
+  }
+}

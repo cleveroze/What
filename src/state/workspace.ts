@@ -20,7 +20,7 @@ import { load, persist } from "./persist";
 import { getSetting, settingsStore } from "./settings";
 import { reportError } from "./ui";
 
-export type SidebarView = "explorer" | "search";
+export type SidebarView = "explorer" | "search" | "assistant" | "extensions";
 export type PanelTab = "terminal" | "output" | "problems";
 
 export interface Layout {

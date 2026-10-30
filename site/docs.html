@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Make an Extension</title>
+  <meta name="description" content="How to build extensions for the Stride code editor: themes, snippets and commands written in JavaScript.">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="./"><img src="assets/logo.svg" alt="">Stride</a>
+    <a class="link" href="workshop.html">Workshop</a>
+    <a class="link hide-sm" href="docs.html" aria-current="page">Make an extension</a>
+    <button class="icon-button" id="theme" aria-label="Toggle dark mode"></button>
+    <a class="btn filled small" data-download href="#">Download</a>
+  </nav>
+
+  <main class="docs">
+    <aside class="toc">
+      <a href="#start">Quick start</a>
+      <a href="#folder">The folder</a>
+      <a href="#manifest">extension.json</a>
+      <a href="#themes">Themes</a>
+      <a href="#snippets">Snippets</a>
+      <a href="#commands">Commands</a>
+      <a href="#api">The stride API</a>
+      <a href="#permissions">Permissions</a>
+      <a href="#examples">Examples</a>
+      <a href="#publish">Publish to the Workshop</a>
+    </aside>
+
+    <article class="prose">
+      <h1>Make an extension</h1>
+      <p class="lead">Extensions (we call them that, not plugins) add themes, snippets and commands to Stride. You need no build tools — just a JSON file and, if you want, a bit of JavaScript.</p>
+
+      <h2 id="start">Quick start</h2>
+      <ol>
+        <li>Open the <b>Extensions</b> panel (<code>Ctrl+Shift+X</code>) and press <b>Build your own extension</b>.</li>
+        <li>Give it a name. Stride creates a folder with a working example and opens <code>main.js</code>.</li>
+        <li>Edit the code and save. Stride reloads the extension instantly.</li>
+        <li>Press <code>Ctrl+Shift+P</code> and find your command — it is listed under your extension's name.</li>
+      </ol>
+      <div class="callout"><p><b>Tip:</b> the five built-in extensions (Word Count, Case Converter, Sakura Theme, HTML Starter Snippets, AI Commenter) are examples. Choose <i>Copy to my extensions</i> in their menu to get an editable copy.</p></div>
+
+      <h2 id="folder">The folder</h2>
+      <p>Your extensions live in the Stride data folder (<i>Extensions panel → ⋯ → Open extensions folder</i>). Each one is a folder whose name is the extension id:</p>
+<pre><code>extensions/
+  my-extension/
+    extension.json   ← description: name, commands, themes, snippets
+    main.js          ← optional code</code></pre>
+
+      <h2 id="manifest">extension.json</h2>
+      <table>
+        <tr><th>Field</th><th>What it is</th></tr>
+        <tr><td><code>id</code></td><td>Unique id: lowercase letters, digits and dashes (<code>word-count</code>). Must match the folder name.</td></tr>
+        <tr><td><code>name</code></td><td>Name shown in the editor.</td></tr>
+        <tr><td><code>version</code></td><td>Like <code>1.0.0</code>. Raise it when you publish an update.</td></tr>
+        <tr><td><code>description</code></td><td>One or two sentences about what it does.</td></tr>
+        <tr><td><code>author</code></td><td>Your name.</td></tr>
+        <tr><td><code>icon</code></td><td>Optional M3 shape: <code>cookie9</code>, <code>clover4</code>, <code>sunny</code>, <code>flower</code>, <code>pentagon</code>, <code>gem</code>, <code>softBurst</code>, <code>pill</code>…</td></tr>
+        <tr><td><code>categories</code></td><td>Any of <code>Themes</code>, <code>Snippets</code>, <code>Tools</code>, <code>AI</code>, <code>Formatters</code>, <code>Fun</code>.</td></tr>
+        <tr><td><code>permissions</code></td><td>Optional: <code>ai</code>, <code>network</code>, <code>clipboard</code>. See <a href="#permissions">Permissions</a>.</td></tr>
+        <tr><td><code>main</code></td><td>Optional JavaScript file, usually <code>main.js</code>.</td></tr>
+        <tr><td><code>contributes</code></td><td>Optional <code>themes</code>, <code>snippets</code> and <code>commands</code>.</td></tr>
+      </table>
+
+      <h2 id="themes">Themes</h2>
+      <p>A theme is described by two colors in <a href="https://oklch.com">OKLCH</a>: a neutral for backgrounds and an accent. Stride generates the full palette for light and dark mode, including code colors.</p>
+<pre><code>{
+  "id": "sunset-theme",
+  "name": "Sunset",
+  "version": "1.0.0",
+  "description": "Warm orange accent on soft sand.",
+  "author": "You",
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [{
+      "id": "sunset",
+      "name": "Sunset",
+      "neutralHue": 60, "neutralChroma": 0.02,
+      "accentHue": 40, "accentChroma": 0.15,
+      "syntaxChroma": 0.12
+    }]
+  }
+}</code></pre>
+      <p>Hue is 0–360, neutral chroma 0–0.04, accent chroma 0–0.2. Your theme appears in <i>Settings → Appearance</i> next to the built-in presets.</p>
+
+      <h2 id="snippets">Snippets</h2>
+      <p>Snippets show up in autocomplete when you type the prefix. Use <code>$1</code>, <code>$2</code> for places the cursor jumps to with Tab, <code>${1:default}</code> for a placeholder and <code>$0</code> for the final cursor.</p>
+<pre><code>"contributes": {
+  "snippets": [{
+    "language": "python",
+    "prefix": "main",
+    "description": "if __name__ == '__main__'",
+    "body": ["def main():", "    $0", "", "if __name__ == \"__main__\":", "    main()"]
+  }]
+}</code></pre>
+
+      <h2 id="commands">Commands</h2>
+      <p>Declare the command in <code>extension.json</code> and register what it does in <code>main.js</code>:</p>
+<pre><code>"main": "main.js",
+"contributes": {
+  "commands": [{ "id": "shout", "title": "Shout Selection", "keybinding": "ctrl+alt+u" }]
+}</code></pre>
+<pre><code>// main.js
+stride.commands.register("shout", async () =&gt; {
+  const text = await stride.editor.getSelectedText();
+  if (!text) return stride.window.showMessage("Select some text first.", "warning");
+  await stride.editor.replaceSelection(text.toUpperCase() + "!");
+});</code></pre>
+      <p>The command appears in the Command Palette (<code>Ctrl+Shift+P</code>). <code>keybinding</code> is optional.</p>
+
+      <h2 id="api">The <code>stride</code> API</h2>
+      <p>Your code runs in a separate sandbox and talks to the editor through the global <code>stride</code> object. Almost every call returns a Promise — use <code>await</code>.</p>
+      <table>
+        <tr><th>Call</th><th>What it does</th></tr>
+        <tr><td><code>commands.register(id, fn)</code></td><td>Runs <code>fn</code> when the command is chosen.</td></tr>
+        <tr><td><code>editor.getText()</code></td><td>Text of the open file.</td></tr>
+        <tr><td><code>editor.getSelectedText()</code></td><td>Selected text (empty string if nothing is selected).</td></tr>
+        <tr><td><code>editor.getLanguage()</code></td><td>Language id, e.g. <code>"python"</code>.</td></tr>
+        <tr><td><code>editor.getFileName()</code></td><td>File name, or <code>null</code> when no file is open.</td></tr>
+        <tr><td><code>editor.replaceSelection(text)</code></td><td>Replaces the selection.</td></tr>
+        <tr><td><code>editor.insertText(text)</code></td><td>Inserts text at the cursor.</td></tr>
+        <tr><td><code>editor.setText(text)</code></td><td>Replaces the whole file (can be undone with Ctrl+Z).</td></tr>
+        <tr><td><code>window.showMessage(text, kind?)</code></td><td>A notification; <code>kind</code> is <code>"info"</code>, <code>"success"</code>, <code>"warning"</code> or <code>"error"</code>.</td></tr>
+        <tr><td><code>window.showQuickPick(items, placeholder?)</code></td><td>A list to choose from. Items are strings or <code>{label, description, value}</code>. Returns the value or <code>null</code>.</td></tr>
+        <tr><td><code>window.showInput(prompt, value?)</code></td><td>Asks for text. Returns it or <code>null</code>.</td></tr>
+        <tr><td><code>statusBar.set(text, tooltip?)</code> / <code>clear()</code></td><td>Your item in the status bar.</td></tr>
+        <tr><td><code>events.onDidSave(fn)</code></td><td>Called with <code>{fileName}</code> after a file is saved.</td></tr>
+        <tr><td><code>events.onDidChangeActiveEditor(fn)</code></td><td>Called with <code>{fileName, language}</code> (or <code>null</code>) when another file becomes active.</td></tr>
+        <tr><td><code>events.onDidChangeText(fn)</code></td><td>Called (debounced) when the text changes.</td></tr>
+        <tr><td><code>storage.get(key)</code> / <code>set(key, value)</code></td><td>Saves small JSON values between restarts.</td></tr>
+        <tr><td><code>clipboard.writeText(text)</code></td><td>Copies text. Needs <code>clipboard</code>.</td></tr>
+        <tr><td><code>ai.complete(prompt, system?)</code></td><td>Asks the AI the user set up and returns the answer as text. Needs <code>ai</code>.</td></tr>
+      </table>
+
+      <h2 id="permissions">Permissions</h2>
+      <p>By default an extension can only read and edit the open file and show UI. It has <b>no internet access</b> and cannot touch your disk. Extra abilities need a permission, and Stride asks the user before installing:</p>
+      <ul>
+        <li><code>ai</code> — use <code>stride.ai.complete</code>. The user's API key is never given to the extension.</li>
+        <li><code>clipboard</code> — use <code>stride.clipboard.writeText</code>.</li>
+        <li><code>network</code> — use <code>fetch</code> and other web APIs.</li>
+      </ul>
+
+      <h2 id="examples">Examples</h2>
+      <p>Every Workshop extension is a readable example. Good places to start:</p>
+      <ul>
+        <li><a href="https://github.com/cleveroze/What/tree/HEAD/extensions/word-count">Word Count</a> — events and the status bar.</li>
+        <li><a href="https://github.com/cleveroze/What/tree/HEAD/extensions/case-converter">Case Converter</a> — quick picks and editing the selection.</li>
+        <li><a href="https://github.com/cleveroze/What/tree/HEAD/extensions/sakura-theme">Sakura Theme</a> — a theme without any code.</li>
+        <li><a href="https://github.com/cleveroze/What/tree/HEAD/extensions/html-snippets">HTML Starter Snippets</a> — snippets without any code.</li>
+        <li><a href="https://github.com/cleveroze/What/tree/HEAD/extensions/ai-commenter">AI Commenter</a> — using AI.</li>
+      </ul>
+      <p>An AI command in a few lines:</p>
+<pre><code>stride.commands.register("explain", async () =&gt; {
+  const code = await stride.editor.getSelectedText();
+  const answer = await stride.ai.complete("Explain this code in one sentence:\n" + code);
+  await stride.window.showMessage(answer);
+});</code></pre>
+
+      <h2 id="publish">Publish to the Workshop</h2>
+      <ol>
+        <li>Fork <a href="https://github.com/cleveroze/What">the repository</a>.</li>
+        <li>Copy your extension folder into <code>extensions/</code>.</li>
+        <li>Run <code>node scripts/build-workshop.mjs</code> — it checks the manifest and adds the extension to the catalog.</li>
+        <li>Open a pull request. Once it is merged, your extension appears in the Workshop in Stride and on this site.</li>
+      </ol>
+      <p>To share privately, just send the folder — your friend puts it into their extensions folder. Any <code>.stride-ext.json</code> file downloaded from the Workshop can also be installed with <i>Extensions → ⋯ → Install from file…</i>.</p>
+    </article>
+  </main>
+
+  <footer>Stride · <a href="./">Home</a> · <a href="workshop.html">Workshop</a> · <a href="https://github.com/cleveroze/What">GitHub</a></footer>
+  <script type="module" src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "id": "lorem-ipsum",
+  "name": "Lorem Ipsum",
+  "version": "1.0.0",
+  "description": "Inserts placeholder text — as many words, sentences or paragraphs as you ask for. Handy for web page mockups.",
+  "author": "Stride",
+  "icon": "puffy",
+  "categories": ["Tools", "Fun"],
+  "main": "main.js",
+  "contributes": { "commands": [{ "id": "insert", "title": "Insert Placeholder Text…" }] }
+}

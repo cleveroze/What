@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stride — a friendly, expressive code editor for Windows</title>
+  <meta name="description" content="Stride is a lightweight code editor for Windows with Material 3 Expressive design, one-click Run, live HTML preview, an AI assistant and a Workshop of extensions.">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="./"><img src="assets/logo.svg" alt="">Stride</a>
+    <a class="link hide-sm" href="#features">Features</a>
+    <a class="link" href="workshop.html">Workshop</a>
+    <a class="link hide-sm" href="docs.html">Make an extension</a>
+    <button class="icon-button" id="theme" aria-label="Toggle dark mode"></button>
+    <a class="btn filled small" data-download href="#">Download</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="reveal">
+        <h1>Code with <span class="accent">a little more joy</span>.</h1>
+        <p class="lead">Stride is a small, fast code editor for Windows. Press F5 to run your code, see web pages live as you type, ask AI for help — and make it look exactly the way you like.</p>
+        <div class="hero-actions">
+          <a class="btn filled" data-download href="#">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8M5 7.75l3 3 3-3M2.75 13.25h10.5"/></svg>
+            Download for Windows
+          </a>
+          <a class="btn tonal" href="workshop.html">Browse the Workshop</a>
+        </div>
+        <div class="hero-note">Free · 6 MB installer · Windows 10 and 11 · <a href="https://github.com/cleveroze/What">Open source</a></div>
+      </div>
+      <div class="hero-art reveal" style="--i: 2">
+        <div class="blob"><svg viewBox="0 0 600 600"><path id="hero-blob" fill="currentColor"/></svg></div>
+        <img src="assets/screenshot.png" alt="The Stride editor with the welcome page, explorer and first steps checklist" width="1320" height="840">
+      </div>
+    </section>
+
+    <section id="features">
+      <h2 class="reveal">Everything you need, nothing that gets in the way</h2>
+      <p class="lead reveal">Built on the same editor core as VS Code, wrapped in a lighter, friendlier app.</p>
+      <div class="grid">
+        <div class="card reveal" style="--i:0"><span class="shape-icon" data-shape="cookie9"><span class="glyph">▶</span></span><h3>Run with one key</h3><p>F5 runs Python, JavaScript, C, C++, Rust, Go, Java and more in the built-in terminal.</p></div>
+        <div class="card reveal" style="--i:1"><span class="shape-icon" data-shape="clover4"><span class="glyph">◐</span></span><h3>Live HTML preview</h3><p>See your page next to the code. CSS, JavaScript and images just work, and it refreshes on save.</p></div>
+        <div class="card reveal" style="--i:2"><span class="shape-icon" data-shape="sunny"><span class="glyph">✦</span></span><h3>AI assistant</h3><p>Explain code, find bugs, write comments and tests — with Claude, OpenRouter or a free local model.</p></div>
+        <div class="card reveal" style="--i:3"><span class="shape-icon" data-shape="flower"><span class="glyph">✚</span></span><h3>Extensions Workshop</h3><p>Install themes, snippets and tools in one click — or build your own with a few lines of JavaScript.</p></div>
+        <div class="card reveal" style="--i:4"><span class="shape-icon" data-shape="softBurst"><span class="glyph">❀</span></span><h3>Expressive design</h3><p>Material 3 Expressive shapes and springy motion. Five presets, your own colors, roundness and density.</p></div>
+        <div class="card reveal" style="--i:5"><span class="shape-icon" data-shape="pill"><span class="glyph">☺</span></span><h3>Made for beginners</h3><p>A welcome tour, a “first steps” checklist and tooltips that explain what every button does.</p></div>
+        <div class="card reveal" style="--i:6"><span class="shape-icon" data-shape="pentagon"><span class="glyph">›_</span></span><h3>A real terminal</h3><p>PowerShell, CMD, Git Bash or WSL — several at once, right inside your project folder.</p></div>
+        <div class="card reveal" style="--i:7"><span class="shape-icon" data-shape="gem"><span class="glyph">⚡</span></span><h3>Tiny and fast</h3><p>A 6 MB installer instead of a 100 MB one. Native Rust under the hood.</p></div>
+      </div>
+    </section>
+
+    <section id="ai">
+      <h2 class="reveal">Bring your favourite AI</h2>
+      <p class="lead reveal">Your key stays on your computer. Pick the provider that suits you.</p>
+      <div class="ai">
+        <div class="card reveal" style="--i:0"><span class="shape-icon" data-shape="sunny"></span><h3>Claude</h3><p>Anthropic's models directly — Opus, Sonnet or Haiku.</p></div>
+        <div class="card reveal" style="--i:1"><span class="shape-icon" data-shape="clover8"></span><h3>OpenRouter</h3><p>One key for hundreds of models: Claude, GPT, Gemini, Llama, DeepSeek — including free ones.</p></div>
+        <div class="card reveal" style="--i:2"><span class="shape-icon" data-shape="cookie6"></span><h3>Local models</h3><p>Ollama, LM Studio or any OpenAI-compatible server. Private and free.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="cta reveal">
+        <svg class="deco" style="top:-60px;left:-40px" width="220" height="220" viewBox="0 0 220 220"><path id="deco1" fill="currentColor"/></svg>
+        <svg class="deco" style="bottom:-70px;right:-30px" width="260" height="260" viewBox="0 0 260 260"><path id="deco2" fill="currentColor"/></svg>
+        <h2>Take your first stride</h2>
+        <p>Download Stride, open a folder, press F5. That's it.</p>
+        <a class="btn filled" data-download href="#">Download for Windows</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>Stride · <a href="workshop.html">Workshop</a> · <a href="docs.html">Make an extension</a> · <a href="https://github.com/cleveroze/What">GitHub</a></footer>
+
+  <script type="module">
+    import { morphCycle } from "./assets/site.js";
+    import { shapePath } from "./assets/shapes.js";
+    morphCycle(document.getElementById("hero-blob"), 600, ["cookie9", "clover4", "softBurst", "flower", "pentagon", "puffy", "gem"]);
+    document.getElementById("deco1").setAttribute("d", shapePath("flower", 220));
+    document.getElementById("deco2").setAttribute("d", shapePath("softBoom", 260));
+  </script>
+</body>
+</html>

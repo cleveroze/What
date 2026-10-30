@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stride Workshop</title>
+  <meta name="description" content="Themes, snippets and tools for the Stride code editor. Install them in one click from the Extensions panel.">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="./"><img src="assets/logo.svg" alt="">Stride</a>
+    <a class="link" href="workshop.html" aria-current="page">Workshop</a>
+    <a class="link hide-sm" href="docs.html">Make an extension</a>
+    <button class="icon-button" id="theme" aria-label="Toggle dark mode"></button>
+    <a class="btn filled small" data-download href="#">Download</a>
+  </nav>
+
+  <main>
+    <section style="padding-bottom: 0">
+      <h1 class="reveal">The Workshop</h1>
+      <p class="lead reveal">Extensions add themes, snippets and new commands to Stride. In the app, open the
+        <b>Extensions</b> panel (<code>Ctrl+Shift+X</code>) → <b>Workshop</b> and press Install. Everything here is free and open source.</p>
+      <div class="toolbar">
+        <label class="search">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+          <input id="q" type="search" placeholder="Search extensions" aria-label="Search extensions">
+        </label>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="ext-grid" id="grid"><div class="empty">Loading…</div></div>
+    </section>
+
+    <section>
+      <div class="cta reveal">
+        <h2>Make your own</h2>
+        <p>An extension is a folder with a small JSON file and, optionally, some JavaScript. Ten minutes from idea to Workshop.</p>
+        <a class="btn filled" href="docs.html">Read the guide</a>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="dlg"><div class="modal" id="dlg-body"></div></dialog>
+
+  <footer>Stride · <a href="./">Home</a> · <a href="docs.html">Make an extension</a> · <a href="https://github.com/cleveroze/What/tree/HEAD/extensions">Source of all extensions</a></footer>
+
+  <script type="module">
+    import { renderShapes } from "./assets/site.js";
+
+    const PERMS = {
+      ai: "Uses the AI provider you set up in Stride (your key never leaves the editor).",
+      network: "Can connect to the internet.",
+      clipboard: "Can copy text to your clipboard.",
+    };
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    const grid = document.getElementById("grid");
+    const chips = document.getElementById("chips");
+    const q = document.getElementById("q");
+    let all = [];
+    let category = "All";
+
+    function card(e, i) {
+      const tags = [
+        ...(e.builtin ? ['<span class="tag">Built in</span>'] : []),
+        ...(e.categories || []).map((c) => `<span class="tag">${esc(c)}</span>`),
+        ...(e.permissions || []).map((p) => `<span class="tag warn">${esc(p)}</span>`),
+      ];
+      return `<button class="card ext" style="--i:${i}" data-id="${esc(e.id)}">
+        <div class="ext-head"><span class="shape-icon" data-shape="${esc(e.icon || "cookie9")}"><span class="glyph">${esc(e.name[0])}</span></span>
+          <div><b>${esc(e.name)}</b><small>${esc(e.author)} · v${esc(e.version)}</small></div></div>
+        <p>${esc(e.description)}</p>
+        <div class="tags">${tags.join("")}</div>
+      </button>`;
+    }
+
+    function render() {
+      const needle = q.value.trim().toLowerCase();
+      const list = all.filter(
+        (e) =>
+          (category === "All" || (e.categories || []).includes(category)) &&
+          (!needle || `${e.name} ${e.description} ${e.author} ${(e.categories || []).join(" ")}`.toLowerCase().includes(needle)),
+      );
+      grid.innerHTML = list.length ? list.map(card).join("") : '<div class="empty">Nothing found. Try another word.</div>';
+      renderShapes(grid);
+    }
+
+    function renderChips() {
+      const cats = ["All", ...new Set(all.flatMap((e) => e.categories || []))];
+      chips.innerHTML = cats.map((c) => `<button class="chip${c === category ? " on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+    }
+
+    function list(title, items) {
+      return items?.length ? `<h4>${title}</h4><ul>${items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
+    }
+
+    function open(id) {
+      const e = all.find((x) => x.id === id);
+      if (!e) return;
+      const s = e.summary || {};
+      const body = document.getElementById("dlg-body");
+      body.innerHTML = `
+        <div class="ext-head"><span class="shape-icon" data-shape="${esc(e.icon || "cookie9")}" data-size="64"><span class="glyph">${esc(e.name[0])}</span></span>
+          <div><h3>${esc(e.name)}</h3><small>${esc(e.author)} · v${esc(e.version)}</small></div></div>
+        <p>${esc(e.description)}</p>
+        ${list("Commands", s.commands)}${list("Themes", s.themes)}${list("Snippets", s.snippets)}
+        ${e.permissions?.length ? `<h4>Permissions</h4><ul>${e.permissions.map((p) => `<li><b>${esc(p)}</b> — ${esc(PERMS[p] || "")}</li>`).join("")}</ul>` : ""}
+        <div class="steps">${
+          e.builtin
+            ? "<b>Already in Stride.</b> This is a built-in example — turn it on or off in the Extensions panel. You can also copy it to your extensions and edit the code."
+            : "<b>How to install:</b> open Stride → Extensions panel (<code>Ctrl+Shift+X</code>) → Workshop → find <b>" + esc(e.name) + "</b> → Install. Or download the file below and use <i>Install from file</i>."
+        }</div>
+        <div class="actions">
+          <a class="btn tonal" href="https://github.com/cleveroze/What/tree/HEAD/extensions/${encodeURIComponent(e.id)}">View source</a>
+          <a class="btn tonal" href="workshop/${esc(e.bundle)}" download="${esc(e.id)}.stride-ext.json">Download file</a>
+          <button class="btn filled" id="dlg-close">Close</button>
+        </div>`;
+      renderShapes(body);
+      body.querySelector("#dlg-close").onclick = () => dlg.close();
+      dlg.showModal();
+    }
+
+    const dlg = document.getElementById("dlg");
+    dlg.addEventListener("click", (ev) => ev.target === dlg && dlg.close());
+    grid.addEventListener("click", (ev) => {
+      const b = ev.target.closest("[data-id]");
+      if (b) open(b.dataset.id);
+    });
+    chips.addEventListener("click", (ev) => {
+      const b = ev.target.closest("[data-cat]");
+      if (!b) return;
+      category = b.dataset.cat;
+      renderChips();
+      render();
+    });
+    q.addEventListener("input", render);
+
+    try {
+      const res = await fetch("workshop/registry.json");
+      all = (await res.json()).extensions;
+      all.sort((a, b) => Number(b.builtin) - Number(a.builtin) || a.name.localeCompare(b.name));
+      renderChips();
+      render();
+    } catch {
+      grid.innerHTML = '<div class="empty">Could not load the Workshop. Please refresh the page.</div>';
+    }
+  </script>
+</body>
+</html>

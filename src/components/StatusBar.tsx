@@ -12,6 +12,7 @@ import { settingsStore } from "../state/settings";
 import { terminalStore } from "../state/terminals";
 import { showPanel, workspaceStore } from "../state/workspace";
 import { Icon } from "./Icon";
+import { extensionsStore } from "../extensions/host";
 
 function Item({ children, onClick, title, desc, className }: { children: React.ReactNode; onClick?: () => void; title: string; desc?: string; className?: string }) {
   return (
@@ -30,6 +31,7 @@ export function StatusBar() {
   const terms = useStore(terminalStore, (s) => s.sessions.filter((x) => !x.exited).length);
   const chord = useStore(chordStore, (s) => s.pending);
   const saved = useStore(savedStore, (s) => s);
+  const extStatus = useStore(extensionsStore, (s) => s.status);
   const [, rerender] = useState(0);
   useEffect(() => {
     if (!saved.at) return;
@@ -68,6 +70,11 @@ export function StatusBar() {
         {chord && <span className="status-chord">({formatBinding(chord)}) was pressed. Waiting for second key of chord…</span>}
       </div>
       <div className="status-right">
+        {Object.entries(extStatus).map(([id, item]) => (
+          <span key={id} className="status-item ext-status" data-tip={item.tooltip || item.text} data-tip-desc={`From the “${id}” extension`}>
+            {item.text}
+          </span>
+        ))}
         {doc && (
           <>
             <Item title="Cursor position" desc="Line and column of the cursor. Click to jump to a line number." onClick={() => runCommand("edit.gotoLine")}>

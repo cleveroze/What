@@ -1,7 +1,10 @@
+import { createStore } from "../lib/store";
 import type { PresetId } from "../state/settings";
 
 export interface Preset {
   id: PresetId;
+  /** Set when the preset comes from an extension. */
+  extension?: string;
   name: string;
   description: string;
   /** Hue/chroma of the neutral surfaces (OKLCH). */
@@ -67,4 +70,15 @@ export const PRESETS: Preset[] = [
   },
 ];
 
-export const presetById = (id: PresetId) => PRESETS.find((p) => p.id === id) ?? PRESETS[0];
+/** Built-in presets plus themes contributed by enabled extensions. */
+export const presetsStore = createStore<{ presets: Preset[] }>({ presets: PRESETS });
+
+export const allPresets = () => presetsStore.get().presets;
+
+export const presetById = (id: PresetId) => allPresets().find((p) => p.id === id) ?? PRESETS[0];
+
+export function setExtensionPresets(extension: string, presets: Preset[]) {
+  presetsStore.set(({ presets: list }) => ({
+    presets: [...list.filter((p) => p.extension !== extension), ...presets.map((p) => ({ ...p, extension }))],
+  }));
+}

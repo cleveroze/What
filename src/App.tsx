@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ActivityBar } from "./components/ActivityBar";
 import { CommandPalette } from "./components/CommandPalette";
 import { EditorArea } from "./components/editor/EditorArea";
-import { ContextMenuHost, DialogHost, Toasts } from "./components/overlays";
+import { ContextMenuHost, DialogHost, InputBoxHost, Toasts } from "./components/overlays";
 import { Panel } from "./components/panel/Panel";
 import { Sash } from "./components/Sash";
 import { Sidebar } from "./components/sidebar/Sidebar";
@@ -127,6 +127,7 @@ export function App() {
       {s["layout.statusBarVisible"] && <StatusBar />}
       <CommandPalette />
       <ContextMenuHost />
+      <InputBoxHost />
       <DialogHost />
       <Onboarding />
       <Toasts />

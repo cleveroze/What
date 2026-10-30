@@ -1,0 +1,317 @@
+{
+  "version": 1,
+  "extensions": [
+    {
+      "id": "ai-commenter",
+      "name": "AI Commenter",
+      "version": "1.0.0",
+      "description": "Select a function and let AI write a documentation comment above it. Example of the “ai” permission — uses whichever AI provider you set up.",
+      "author": "Stride",
+      "icon": "sunny",
+      "categories": [
+        "AI"
+      ],
+      "permissions": [
+        "ai"
+      ],
+      "summary": {
+        "commands": [
+          "Write Doc Comment for Selection"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": true,
+      "bundle": "extensions/ai-commenter.stride-ext.json"
+    },
+    {
+      "id": "base64-tools",
+      "name": "Encode / Decode",
+      "version": "1.0.0",
+      "description": "Base64 and URL encoding and decoding of the selected text (full Unicode support).",
+      "author": "Stride",
+      "icon": "bun",
+      "categories": [
+        "Tools"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Encode / Decode Selection…"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/base64-tools.stride-ext.json"
+    },
+    {
+      "id": "case-converter",
+      "name": "Case Converter",
+      "version": "1.0.0",
+      "description": "Converts the selected text to camelCase, snake_case, kebab-case, PascalCase, UPPER or Title Case. Example of quick picks and editing the selection.",
+      "author": "Stride",
+      "icon": "clover4",
+      "categories": [
+        "Tools"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Convert Case of Selection…"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": true,
+      "bundle": "extensions/case-converter.stride-ext.json"
+    },
+    {
+      "id": "color-tools",
+      "name": "Color Tools",
+      "version": "1.0.0",
+      "description": "Select a color like #ff8800, rgb(255,136,0) or hsl(32,100%,50%) and convert it to another format.",
+      "author": "Stride",
+      "icon": "flower",
+      "categories": [
+        "Tools"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Convert Color…"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/color-tools.stride-ext.json"
+    },
+    {
+      "id": "html-snippets",
+      "name": "HTML Starter Snippets",
+      "version": "1.0.0",
+      "description": "Type a shortcut like “html5” or “card” in an HTML file and press Enter to get a ready-made block. Example of a snippets extension.",
+      "author": "Stride",
+      "icon": "pentagon",
+      "categories": [
+        "Snippets"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [],
+        "themes": [],
+        "snippets": [
+          "html5",
+          "card",
+          "form",
+          "nav"
+        ]
+      },
+      "builtin": true,
+      "bundle": "extensions/html-snippets.stride-ext.json"
+    },
+    {
+      "id": "json-tools",
+      "name": "JSON Tools",
+      "version": "1.0.0",
+      "description": "Format, minify and sort the keys of JSON — the whole file or just the selection. Tells you exactly where invalid JSON breaks.",
+      "author": "Stride",
+      "icon": "gem",
+      "categories": [
+        "Formatters"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Format JSON",
+          "Minify JSON",
+          "Sort JSON Keys"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/json-tools.stride-ext.json"
+    },
+    {
+      "id": "line-tools",
+      "name": "Line Tools",
+      "version": "1.0.0",
+      "description": "Sort, reverse, shuffle, remove duplicates or empty lines, number or trim the lines of your selection (or the whole file).",
+      "author": "Stride",
+      "icon": "slanted",
+      "categories": [
+        "Tools"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Line Tools…"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/line-tools.stride-ext.json"
+    },
+    {
+      "id": "lorem-ipsum",
+      "name": "Lorem Ipsum",
+      "version": "1.0.0",
+      "description": "Inserts placeholder text — as many words, sentences or paragraphs as you ask for. Handy for web page mockups.",
+      "author": "Stride",
+      "icon": "puffy",
+      "categories": [
+        "Tools",
+        "Fun"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Insert Placeholder Text…"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/lorem-ipsum.stride-ext.json"
+    },
+    {
+      "id": "nature-themes",
+      "name": "Nature Themes",
+      "version": "1.0.0",
+      "description": "Three calm palettes: Dune (warm sand), Glacier (icy blue) and Plum (deep violet). Each works in light and dark mode.",
+      "author": "Stride",
+      "icon": "softBurst",
+      "categories": [
+        "Themes"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [],
+        "themes": [
+          "Dune",
+          "Glacier",
+          "Plum"
+        ],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/nature-themes.stride-ext.json"
+    },
+    {
+      "id": "python-snippets",
+      "name": "Python Starter Snippets",
+      "version": "1.0.0",
+      "description": "Shortcuts for common Python code: main block, functions, classes, loops, file reading and input. Type the shortcut and press Enter.",
+      "author": "Stride",
+      "icon": "pill",
+      "categories": [
+        "Snippets"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [],
+        "themes": [],
+        "snippets": [
+          "main",
+          "def",
+          "class",
+          "forr",
+          "readfile",
+          "ask"
+        ]
+      },
+      "builtin": false,
+      "bundle": "extensions/python-snippets.stride-ext.json"
+    },
+    {
+      "id": "react-snippets",
+      "name": "React Snippets",
+      "version": "1.0.0",
+      "description": "Quick React building blocks: function components, useState, useEffect and list rendering for JavaScript and TypeScript.",
+      "author": "Stride",
+      "icon": "clover8",
+      "categories": [
+        "Snippets"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [],
+        "themes": [],
+        "snippets": [
+          "rfc",
+          "us",
+          "ue",
+          "map"
+        ]
+      },
+      "builtin": false,
+      "bundle": "extensions/react-snippets.stride-ext.json"
+    },
+    {
+      "id": "sakura-theme",
+      "name": "Sakura Theme",
+      "version": "1.0.0",
+      "description": "Soft cherry-blossom pinks for light and dark mode. Example of a theme extension — no code needed, just a few numbers.",
+      "author": "Stride",
+      "icon": "flower",
+      "categories": [
+        "Themes"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [],
+        "themes": [
+          "Sakura"
+        ],
+        "snippets": []
+      },
+      "builtin": true,
+      "bundle": "extensions/sakura-theme.stride-ext.json"
+    },
+    {
+      "id": "timestamp",
+      "name": "Timestamp",
+      "version": "1.0.0",
+      "description": "Inserts the current date and time in the format you pick: ISO 8601, Unix seconds, local date, and more.",
+      "author": "Stride",
+      "icon": "sunny",
+      "categories": [
+        "Tools"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Insert Date / Time…"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": false,
+      "bundle": "extensions/timestamp.stride-ext.json"
+    },
+    {
+      "id": "word-count",
+      "name": "Word Count",
+      "version": "1.0.0",
+      "description": "Shows words, characters and reading time of the open file in the status bar. A small example of status bar items and editor events.",
+      "author": "Stride",
+      "icon": "cookie4",
+      "categories": [
+        "Tools"
+      ],
+      "permissions": [],
+      "summary": {
+        "commands": [
+          "Show Word Count Details"
+        ],
+        "themes": [],
+        "snippets": []
+      },
+      "builtin": true,
+      "bundle": "extensions/word-count.stride-ext.json"
+    }
+  ]
+}

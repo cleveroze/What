@@ -70,6 +70,23 @@ Everything in the UI runs against the real machine. Files are read and written b
 
 The **Settings** page has a searchable sidebar with General, Editor, Appearance, Themes, Terminal, Files, Keyboard Shortcuts and Advanced sections. It also shows a live preview of the workbench that updates as you hover over presets.
 
+## AI assistant
+
+Open the **Assistant** panel (`Ctrl+Shift+A`) and pick a provider in *Settings → AI Assistant*:
+
+- **Claude** (Anthropic API key) — Opus, Sonnet or Haiku. Server-side model fallback is enabled for models that support it.
+- **OpenRouter** — one key for hundreds of models, including free ones.
+- **Local / custom** — Ollama, LM Studio or any OpenAI-compatible server.
+
+Keys are stored only on your computer. Right-click in the editor for *Explain*, *Find Bugs*, *Add Comments*; the Problems panel has *Explain with AI*.
+
+## Extensions and the Workshop
+
+Extensions add themes, snippets and commands (`Ctrl+Shift+X`). Code runs in a sandboxed Web Worker with no network access unless the `network` permission is granted. Five built-in examples ship with the app; more are in the **Workshop** — in the app and at https://cleveroze.github.io/What/workshop.html.
+
+- Sources: [`extensions/`](extensions) · guide: [`site/docs.html`](site/docs.html) (https://cleveroze.github.io/What/docs.html)
+- `npm run build:site` rebuilds the Workshop catalog (`site/workshop/registry.json`) and site assets; the *Website* workflow deploys `site/` to GitHub Pages.
+
 ## Architecture
 
 ```

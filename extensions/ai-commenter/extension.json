@@ -1,0 +1,14 @@
+{
+  "id": "ai-commenter",
+  "name": "AI Commenter",
+  "version": "1.0.0",
+  "description": "Select a function and let AI write a documentation comment above it. Example of the “ai” permission — uses whichever AI provider you set up.",
+  "author": "Stride",
+  "icon": "sunny",
+  "categories": ["AI"],
+  "permissions": ["ai"],
+  "main": "main.js",
+  "contributes": {
+    "commands": [{ "id": "document", "title": "Write Doc Comment for Selection" }]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "line-tools",
+  "name": "Line Tools",
+  "version": "1.0.0",
+  "description": "Sort, reverse, shuffle, remove duplicates or empty lines, number or trim the lines of your selection (or the whole file).",
+  "author": "Stride",
+  "icon": "slanted",
+  "categories": ["Tools"],
+  "main": "main.js",
+  "contributes": { "commands": [{ "id": "menu", "title": "Line Tools…", "keybinding": "ctrl+alt+l" }] }
+}

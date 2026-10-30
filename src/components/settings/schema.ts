@@ -1,12 +1,13 @@
 import type { SettingKey } from "../../state/settings";
 
-export type SectionId = "general" | "editor" | "appearance" | "themes" | "terminal" | "files" | "shortcuts" | "advanced";
+export type SectionId = "general" | "editor" | "appearance" | "themes" | "ai" | "terminal" | "files" | "shortcuts" | "advanced";
 
 export const SECTIONS: { id: SectionId; label: string; icon: string; description: string }[] = [
   { id: "general", label: "General", icon: "general", description: "Startup, windows and session behaviour" },
   { id: "editor", label: "Editor", icon: "code", description: "Typography, cursor, indentation and editing aids" },
   { id: "appearance", label: "Appearance", icon: "layout", description: "Layout, density, shape, motion and icons" },
   { id: "themes", label: "Themes", icon: "palette", description: "Color presets, accent and surface colors" },
+  { id: "ai", label: "AI Assistant", icon: "sparkle", description: "Connect Claude, OpenRouter or a local model" },
   { id: "terminal", label: "Terminal", icon: "terminal", description: "Shell, font and cursor of the integrated terminal" },
   { id: "files", label: "Files", icon: "files", description: "Saving, encoding, deletion and exclusions" },
   { id: "shortcuts", label: "Keyboard Shortcuts", icon: "keyboard", description: "View and customize key bindings" },

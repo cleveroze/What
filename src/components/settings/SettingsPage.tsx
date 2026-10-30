@@ -19,7 +19,7 @@ import {
 import { loadShells, terminalStore } from "../../state/terminals";
 import { confirm, notify, reportError } from "../../state/ui";
 import { resolveDark, themeStore, tokensFor } from "../../theme/engine";
-import { PRESETS, type Preset } from "../../theme/presets";
+import { presetsStore, type Preset } from "../../theme/presets";
 import { ACTIVITY_LABELS } from "../ActivityBar";
 import type { ShapeName } from "../../lib/shapes";
 import { openOnboarding } from "../../state/ui";
@@ -28,6 +28,7 @@ import { MorphShape } from "../Shape";
 import { Button, ColorField, IconButton, NumberField, Segmented, Select, Slider, Switch, TextField } from "../ui/controls";
 import { SECTIONS, SETTINGS, type SectionId, type SettingDef } from "./schema";
 import { ShortcutsEditor } from "./ShortcutsEditor";
+import { AiSection } from "./AiSection";
 import { ThemePreview } from "./ThemePreview";
 
 const SECTION_SHAPES: Record<SectionId, ShapeName> = {
@@ -39,6 +40,7 @@ const SECTION_SHAPES: Record<SectionId, ShapeName> = {
   files: "arch",
   shortcuts: "cookie4",
   advanced: "softBurst",
+  ai: "sunny",
 };
 
 const ACCENT_SWATCHES = ["#c0612b", "#3f7cc0", "#1f8a8a", "#3e8a4f", "#8a5cc0", "#c04a6a", "#262626"];
@@ -211,6 +213,7 @@ function PresetCard({ preset, settings, onHover }: { preset: Preset; settings: S
 
 function ThemesSection({ settings }: { settings: Settings }) {
   const [hover, setHover] = useState<Preset | null>(null);
+  const presets = useStore(presetsStore, (x) => x.presets);
   const tokens = hover ? tokensFor(settings, { preset: hover.id }) : themeStore.get().tokens;
   useStore(themeStore, (s) => s.tokens);
   return (
@@ -237,7 +240,7 @@ function ThemesSection({ settings }: { settings: Settings }) {
       <section className="settings-group">
         <h3>Presets</h3>
         <div className="preset-grid">
-          {PRESETS.map((p) => (
+          {presets.map((p) => (
             <PresetCard key={p.id} preset={p} settings={settings} onHover={setHover} />
           ))}
         </div>
@@ -482,6 +485,8 @@ export default function SettingsPage() {
                 <ThemesSection settings={settings} />
               ) : section === "shortcuts" ? (
                 <ShortcutsEditor />
+              ) : section === "ai" ? (
+                <AiSection />
               ) : section === "advanced" ? (
                 <AdvancedSection settings={settings} />
               ) : (

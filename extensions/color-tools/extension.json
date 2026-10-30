@@ -1,0 +1,11 @@
+{
+  "id": "color-tools",
+  "name": "Color Tools",
+  "version": "1.0.0",
+  "description": "Select a color like #ff8800, rgb(255,136,0) or hsl(32,100%,50%) and convert it to another format.",
+  "author": "Stride",
+  "icon": "flower",
+  "categories": ["Tools"],
+  "main": "main.js",
+  "contributes": { "commands": [{ "id": "convert", "title": "Convert Color…" }] }
+}

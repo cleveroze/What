@@ -1,0 +1,28 @@
+{
+  "manifest": {
+    "id": "ai-commenter",
+    "name": "AI Commenter",
+    "version": "1.0.0",
+    "description": "Select a function and let AI write a documentation comment above it. Example of the “ai” permission — uses whichever AI provider you set up.",
+    "author": "Stride",
+    "icon": "sunny",
+    "categories": [
+      "AI"
+    ],
+    "permissions": [
+      "ai"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "document",
+          "title": "Write Doc Comment for Selection"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "// AI Commenter — example extension using the \"ai\" permission.\n// stride.ai.complete(prompt, system) sends a prompt to the AI provider the\n// user configured in Settings → AI and returns the answer as text.\n\nstride.commands.register(\"document\", async () => {\n  const code = await stride.editor.getSelectedText();\n  if (!code.trim()) return stride.window.showMessage(\"Select a function or block of code first.\", \"warning\");\n  const language = (await stride.editor.getLanguage()) || \"code\";\n  await stride.statusBar.set(\"✍ Writing comment…\");\n  try {\n    const answer = await stride.ai.complete(\n      `Write a short documentation comment for this ${language} code. ` +\n        \"Use the comment style of the language (JSDoc, docstring, ///, ...). \" +\n        \"Reply with the comment followed by the original code, and nothing else — no code fences.\\n\\n\" +\n        code,\n      \"You write concise, accurate documentation comments.\",\n    );\n    const cleaned = answer.replace(/^```[\\w-]*\\n?/, \"\").replace(/\\n?```\\s*$/, \"\");\n    await stride.editor.replaceSelection(cleaned);\n  } catch (e) {\n    await stride.window.showMessage(String(e.message || e), \"error\");\n  } finally {\n    await stride.statusBar.clear();\n  }\n});\n"
+  }
+}

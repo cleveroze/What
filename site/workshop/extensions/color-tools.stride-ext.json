@@ -1,0 +1,25 @@
+{
+  "manifest": {
+    "id": "color-tools",
+    "name": "Color Tools",
+    "version": "1.0.0",
+    "description": "Select a color like #ff8800, rgb(255,136,0) or hsl(32,100%,50%) and convert it to another format.",
+    "author": "Stride",
+    "icon": "flower",
+    "categories": [
+      "Tools"
+    ],
+    "main": "main.js",
+    "contributes": {
+      "commands": [
+        {
+          "id": "convert",
+          "title": "Convert Color…"
+        }
+      ]
+    }
+  },
+  "files": {
+    "main.js": "function parse(s) {\n  s = s.trim();\n  let m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(s);\n  if (m) {\n    let h = m[1];\n    if (h.length === 3) h = h.split(\"\").map((c) => c + c).join(\"\");\n    const n = parseInt(h, 16);\n    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];\n  }\n  m = /^rgba?\\(\\s*(\\d+)[,\\s]+(\\d+)[,\\s]+(\\d+)/i.exec(s);\n  if (m) return [+m[1], +m[2], +m[3]];\n  m = /^hsla?\\(\\s*([\\d.]+)[,\\s]+([\\d.]+)%[,\\s]+([\\d.]+)%/i.exec(s);\n  if (m) {\n    const h = +m[1] / 360, sat = +m[2] / 100, l = +m[3] / 100;\n    const f = (n) => {\n      const k = (n + h * 12) % 12;\n      const a = sat * Math.min(l, 1 - l);\n      return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));\n    };\n    return [f(0), f(8), f(4)];\n  }\n  return null;\n}\n\nfunction toHsl([r, g, b]) {\n  r /= 255; g /= 255; b /= 255;\n  const max = Math.max(r, g, b), min = Math.min(r, g, b);\n  let h = 0, s = 0;\n  const l = (max + min) / 2;\n  if (max !== min) {\n    const d = max - min;\n    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);\n    h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;\n    h /= 6;\n  }\n  return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;\n}\n\nstride.commands.register(\"convert\", async () => {\n  const text = await stride.editor.getSelectedText();\n  const rgb = parse(text);\n  if (!rgb) return stride.window.showMessage(\"Select a color such as #ff8800, rgb(255, 136, 0) or hsl(32, 100%, 50%).\", \"warning\");\n  const hex = \"#\" + rgb.map((v) => v.toString(16).padStart(2, \"0\")).join(\"\");\n  const choice = await stride.window.showQuickPick([hex, `rgb(${rgb.join(\", \")})`, toHsl(rgb)], \"Convert to…\");\n  if (choice) await stride.editor.replaceSelection(choice);\n});\n"
+  }
+}

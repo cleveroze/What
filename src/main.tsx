@@ -12,6 +12,8 @@ import { openFile } from "./state/editors";
 import { installCloseHandler } from "./state/lifecycle";
 import { installRipple } from "./lib/ripple";
 import { initProgress } from "./state/progress";
+import { initSecrets } from "./state/secrets";
+import { initExtensions } from "./extensions/host";
 import { log } from "./state/output";
 import { load } from "./state/persist";
 import "./state/problems";
@@ -43,6 +45,7 @@ async function boot() {
     await initKeybindings();
     const lastRoot = await initWorkspace();
     await initProgress();
+    await initSecrets();
     installRipple();
 
     createRoot(document.getElementById("root")!).render(
@@ -63,6 +66,7 @@ async function boot() {
     // Hidden webviews get no animation frames, so use a timer, not rAF.
     setTimeout(() => win.show().then(() => win.setFocus()).catch(() => {}), 40);
     await restoreSession(lastRoot);
+    initExtensions().catch((e) => reportError("Extensions failed to load", e));
     log("Stride ready");
   } catch (e) {
     reportError("Startup failed", e);

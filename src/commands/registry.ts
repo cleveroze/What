@@ -30,6 +30,10 @@ export function registerCommands(list: Command[]) {
   for (const c of list) commands.set(c.id, c);
 }
 
+export function unregisterCommands(ids: string[]) {
+  for (const id of ids) commands.delete(id);
+}
+
 export const getCommand = (id: string) => commands.get(id);
 export const allCommands = () => [...commands.values()];
 
