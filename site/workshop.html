@@ -7,6 +7,7 @@
   <meta name="description" content="Themes, snippets and tools for the Stride code editor. Install them in one click from the Extensions panel.">
   <link rel="icon" href="assets/logo.svg">
   <link rel="stylesheet" href="assets/site.css">
+<style>.workshop-eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;color:var(--accent);margin-bottom:16px}.workshop-stats{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}.workshop-stats span{border:1px solid var(--border);background:var(--surface);padding:10px 17px;border-radius:50px;color:var(--muted)}.workshop-stats b{color:var(--text)}.workshop-sort{border:1px solid var(--border);border-radius:18px;background:var(--surface);color:var(--text);padding:10px 14px;font:inherit}.workshop-results{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px;margin-top:18px}.workshop-results button{border:0;background:transparent;color:var(--accent);font:inherit;cursor:pointer}.ext-explore{font-size:13px;color:var(--accent);font-weight:700;margin-top:8px}.ext{min-height:235px}.ext:focus-visible,.chip:focus-visible{outline:3px solid var(--accent);outline-offset:3px}@media(max-width:600px){.workshop-stats{gap:6px}.workshop-stats span{padding:8px 11px}.ext{min-height:0}}</style>
 </head>
 <body>
   <nav class="nav">
@@ -19,7 +20,8 @@
 
   <main>
     <section style="padding-bottom: 0">
-      <div class="workshop-eyebrow">STRIDE / EXTENSIONS</div><h1 class="reveal">The <span style="color:var(--accent)">Workshop.</span></h1><p class="lead">Make Stride your own — extensions, themes and tools that feel right at home.</p>
+      <div class="workshop-eyebrow">STRIDE / EXTENSIONS</div><h1 class="reveal">The <span style="color:var(--accent)">Workshop.</span></h1>
+<div class="workshop-stats"><span><b id="ext-count">—</b> extensions</span><span><b id="theme-count">—</b> themes</span><span>Free &amp; open source</span></div><p class="lead">Make Stride your own — extensions, themes and tools that feel right at home.</p>
       <p class="lead reveal">Extensions add themes, snippets and new commands to Stride. In the app, open the
         <b>Extensions</b> panel (<code>Ctrl+Shift+X</code>) → <b>Workshop</b> and press Install. Everything here is free and open source.</p>
       <div class="toolbar">
@@ -28,8 +30,10 @@
           <input id="q" type="search" placeholder="Search extensions" aria-label="Search extensions">
         </label>
         <div class="chips" id="chips"></div>
+<select id="sort" class="workshop-sort" aria-label="Sort extensions"><option value="featured">Featured</option><option value="name">Name A–Z</option><option value="newest">Newest version</option></select>
       </div>
-      <div class="ext-grid" id="grid"><div class="empty">Loading…</div></div>
+      <div class="workshop-results"><span id="result-count" aria-live="polite">Browsing extensions</span><button id="reset-filters" type="button" hidden>Clear filters</button></div>
+<div class="ext-grid" id="grid"><div class="empty">Loading…</div></div>
     </section>
 
     <section>
@@ -58,7 +62,9 @@
     const chips = document.getElementById("chips");
     const q = document.getElementById("q");
     let all = [];
-    let category = "All";
+    let category = new URLSearchParams(location.search).get("category") || "All";
+const sort = document.getElementById("sort"), resultCount = document.getElementById("result-count"), reset = document.getElementById("reset-filters");
+q.value = new URLSearchParams(location.search).get("q") || "";
 
     function card(e, i) {
       const tags = [
@@ -70,7 +76,7 @@
         <div class="ext-head"><span class="shape-icon" data-shape="${esc(e.icon || "cookie9")}"><span class="glyph">${esc(e.name[0])}</span></span>
           <div><b>${esc(e.name)}</b><small>${esc(e.author)} · v${esc(e.version)}</small></div></div>
         <p>${esc(e.description)}</p>
-        <div class="tags">${tags.join("")}</div>
+        <div class="tags">${tags.join("")}</div><span class="ext-explore">View details ↗</span>
       </button>`;
     }
 
@@ -81,6 +87,10 @@
           (category === "All" || (e.categories || []).includes(category)) &&
           (!needle || `${e.name} ${e.description} ${e.author} ${(e.categories || []).join(" ")}`.toLowerCase().includes(needle)),
       );
+      if (sort.value === "name") list.sort((a,b) => a.name.localeCompare(b.name));
+      if (sort.value === "newest") list.sort((a,b) => b.version.localeCompare(a.version,undefined,{numeric:true}));
+      resultCount.textContent = `${list.length} of ${all.length} extensions`;
+      reset.hidden = !needle && category === "All";
       grid.innerHTML = list.length ? list.map(card).join("") : '<div class="empty">Nothing found. Try another word.</div>';
       renderShapes(grid);
     }
@@ -134,13 +144,19 @@
       render();
     });
     q.addEventListener("input", render);
+    sort.addEventListener("change", render);
+    reset.addEventListener("click", () => { q.value=""; category="All"; sort.value="featured"; renderChips(); render(); });
 
     try {
       const res = await fetch("workshop/registry.json");
       all = (await res.json()).extensions;
       all.sort((a, b) => Number(b.builtin) - Number(a.builtin) || a.name.localeCompare(b.name));
+      if (!["All",...new Set(all.flatMap(e=>e.categories||[]))].includes(category)) category="All";
+      document.getElementById("ext-count").textContent = all.length;
+      document.getElementById("theme-count").textContent = all.filter(e=>(e.categories||[]).some(c=>c.toLowerCase().includes("theme"))).length;
       renderChips();
       render();
+      if (location.hash) open(decodeURIComponent(location.hash.slice(1)));
     } catch {
       grid.innerHTML = '<div class="empty">Could not load the Workshop. Please refresh the page.</div>';
     }
