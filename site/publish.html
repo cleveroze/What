@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publish an extension — Stride Workshop</title><meta name="description" content="Submit your Stride extension for review by the Workshop maintainers.">
+<link rel="icon" href="assets/logo.svg"><link rel="stylesheet" href="assets/site.css">
+<style>
+.publish-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:22px;align-items:start}
+.publish-panel{border-radius:32px;padding:30px;background:var(--surface);border:1px solid var(--border)}
+.publish-panel label{display:block;font-weight:700;margin:20px 0 7px}
+.publish-panel input,.publish-panel textarea,.publish-panel select{width:100%;box-sizing:border-box;background:var(--raised);border:1px solid var(--border);border-radius:17px;color:var(--text);font:inherit;padding:13px 15px}
+.publish-panel textarea{min-height:110px;resize:vertical}
+.publish-panel input:focus-visible,.publish-panel textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.note{font-size:13px;color:var(--muted);margin-top:7px}.steps-list{color:var(--muted);padding-left:24px}.steps-list li{padding:7px 0}
+.publish-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.status-pill{display:inline-block;background:var(--accent-soft);color:var(--on-accent-soft);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:700}
+@media(max-width:790px){.publish-layout{grid-template-columns:1fr}.publish-panel{padding:22px}}
+</style></head>
+<body><nav class="nav"><a class="brand" href="./"><img src="assets/logo.svg" alt="">Stride</a><a class="link" href="workshop.html">Workshop</a><a class="link" href="docs.html">Developer docs</a><button class="icon-button" id="theme" aria-label="Toggle dark mode"></button><a class="btn filled small" data-download href="#">Download</a></nav>
+<main><section><span class="status-pill">STRIDE WORKSHOP · CREATOR PORTAL</span><h1 style="font-size:clamp(38px,6vw,64px);max-width:800px;margin:22px 0">Share what you've <span style="color:var(--accent)">created.</span></h1><p class="lead">Publish themes, snippets and tools. Every extension is reviewed by the Stride maintainers before it reaches the Workshop.</p>
+<div class="publish-layout">
+<div class="publish-panel"><h2 style="font-size:27px">Submit an extension</h2><p class="note">Your GitHub account is your publisher identity. No extra password or account is needed.</p>
+<form id="submission">
+<label for="name">Extension name</label><input id="name" required maxlength="70" placeholder="My awesome extension">
+<label for="slug">Extension ID</label><input id="slug" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="my-awesome-extension"><div class="note">Lowercase letters, numbers and hyphens only. Must match your folder and extension.json ID.</div>
+<label for="repo">Source repository URL</label><input id="repo" required type="url" pattern="https://github\\.com/.+" placeholder="https://github.com/you/my-stride-extension">
+<label for="description">What does it do?</label><textarea id="description" required minlength="20" maxlength="1800" placeholder="Describe features, usage and why it's useful."></textarea>
+<label for="permissions">Permissions needed</label><select id="permissions"><option value="none">None</option><option value="ai">AI</option><option value="network">Network</option><option value="clipboard">Clipboard</option><option value="multiple">Multiple — explained in description</option></select>
+<div class="publish-actions"><button class="btn filled" type="submit">Continue with GitHub ↗</button><a class="btn tonal" href="docs.html">Extension SDK guide</a></div><p class="note" id="message" role="status">Submitting opens a GitHub issue under your signed-in account. An issue is a review request, not an instant publication.</p>
+</form></div>
+<aside class="publish-panel"><h3 style="margin-top:0">How approval works</h3><ol class="steps-list"><li>Sign in to GitHub and submit your extension details.</li><li>Prepare the extension files in your repository. Include <code>extension.json</code> and any required script.</li><li>Open a pull request adding the folder to <code>extensions/&lt;id&gt;/</code>.</li><li>The repository owner reviews permissions, source and behavior.</li><li>Once the pull request is approved and merged, the Workshop catalog is rebuilt and the extension goes live.</li></ol><a class="btn tonal" href="https://github.com/cleveroze/What/pulls">View review queue ↗</a><p class="note">Only maintainers with repository merge permission can approve publication. Closing a request without merging does not publish the plugin.</p></aside>
+</div></section></main><footer>Stride · <a href="workshop.html">Workshop</a> · <a href="https://github.com/cleveroze/What">GitHub</a></footer>
+<script type="module">import "./assets/site.js";
+const form=document.getElementById("submission"),slug=document.getElementById("slug"),name=document.getElementById("name");let touched=false;
+slug.addEventListener("input",()=>{touched=true});name.addEventListener("input",()=>{if(!touched)slug.value=name.value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")});
+form.addEventListener("submit",e=>{e.preventDefault();if(!form.reportValidity())return;
+const repo=document.getElementById("repo").value.trim();try{const u=new URL(repo);if(u.protocol!=="https:"||u.hostname!=="github.com"||u.pathname.split("/").filter(Boolean).length<2)throw Error();}catch{document.getElementById("message").textContent="Please provide a public GitHub repository URL.";return}
+const title="[Extension submission] "+name.value.trim();const body=["## Extension",name.value.trim(),"","## Extension ID",slug.value,"","## Source repository",repo,"","## Description",document.getElementById("description").value.trim(),"","## Permissions",document.getElementById("permissions").value,"","## Review checklist","- [ ] Source code and extension.json are available","- [ ] I will submit the extension files as a pull request","- [ ] I understand publication requires maintainer approval"].join("\n");
+const url=new URL("https://github.com/cleveroze/What/issues/new");url.searchParams.set("title",title);url.searchParams.set("body",body);url.searchParams.set("labels","extension-submission");window.location.href=url.toString();
+});</script></body></html>
