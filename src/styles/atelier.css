@@ -1,0 +1,290 @@
+/* Stride Atelier — solid, editorial desktop design.
+   No glass, blur, translucent panels or luminous gradients.
+   Loaded last to preserve all component interactions and user customization. */
+:root {
+  --atelier-ink: #191d23;
+  --atelier-paper: #f7f6f2;
+  --atelier-edge: color-mix(in srgb,var(--text) 11%,transparent);
+  --atelier-ease: cubic-bezier(.22,1,.36,1);
+}
+html[data-theme="dark"] {
+  --atelier-ink: #e9e9e7;
+  --atelier-paper: #17191d;
+}
+body {
+  font-feature-settings: "ss01" on, "cv11" on;
+  letter-spacing: -.008em;
+}
+.app {
+  background: var(--bg);
+}
+.titlebar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--atelier-edge);
+  gap: 6px;
+}
+.titlebar-brand {
+  margin-left: 6px;
+}
+.titlebar-brand .logo {
+  filter: none;
+}
+.menubar-item {
+  font-weight: 570;
+  border-radius: 7px;
+  letter-spacing: -.01em;
+}
+.command-center {
+  border: 1px solid var(--atelier-edge);
+  box-shadow: none;
+  background: var(--surface);
+  border-radius: 9px;
+  height: min(32px,calc(100% - 9px));
+  font-weight: 500;
+}
+.command-center:hover {
+  border-color: var(--border-strong);
+  box-shadow: none;
+  background: var(--raised);
+}
+.workbench {
+  padding: 0 !important;
+  gap: 0;
+}
+.sheet {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--surface);
+}
+.sidebar-wrap > .sidebar,
+.panel-wrap > .panel {
+  background: var(--surface);
+}
+.sidebar-wrap {
+  border-right: 1px solid var(--atelier-edge);
+}
+.sidebar-right .sidebar-wrap {
+  border-left: 1px solid var(--atelier-edge);
+  border-right: 0;
+}
+.main-column {
+  background: var(--editor);
+}
+.panel-wrap {
+  border-top: 1px solid var(--atelier-edge);
+}
+.sash-vertical {
+  width: max(4px,var(--gap));
+  margin-inline: calc(min(4px,var(--gap)) * -0.5);
+}
+.sash-horizontal {
+  height: max(4px,var(--gap));
+  margin-block: calc(min(4px,var(--gap)) * -0.5);
+}
+.activitybar.vertical {
+  padding-top: 10px;
+  gap: 6px;
+  background: var(--bg);
+  border-right: 1px solid var(--atelier-edge);
+}
+.activity-item {
+  border-radius: 11px;
+}
+.activity-item:hover {
+  background: var(--hover);
+  transform: none;
+}
+.activity-item.active {
+  color: var(--accent);
+}
+.activity-indicator {
+  opacity: .85;
+}
+.activity-indicator .shape {
+  opacity: .62;
+}
+.sidebar-section-header {
+  height: calc(var(--tab-h) + 5px);
+  border-bottom: 1px solid var(--atelier-edge);
+  padding-inline: 18px 10px;
+}
+.sidebar-section-title {
+  letter-spacing: .12em;
+  font-size: 10px;
+  font-weight: 760;
+}
+.tree {
+  padding: 8px 0 16px;
+}
+.tree-row {
+  left: 9px;
+  right: 9px;
+  border-radius: 7px;
+}
+.tree-row:hover {
+  background: var(--hover);
+}
+.tree-row.selected,
+.tree.focused .tree-row.selected {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.tree-row.active-file .tree-label {
+  color: var(--text);
+  font-weight: 650;
+}
+.file-icon.badge {
+  border-radius: 5px;
+}
+.editor-area,
+.editor-body,
+.monaco-host {
+  background: var(--editor);
+}
+.tabs-bar {
+  background: var(--surface);
+  box-shadow: inset 0 -1px 0 var(--atelier-edge);
+  height: calc(var(--tab-h) + 4px);
+}
+.tabs {
+  padding: 5px 8px 0;
+  gap: 3px;
+}
+.tab {
+  border-radius: 9px 9px 0 0;
+  padding-inline: 13px 8px;
+  font-weight: 520;
+  font-size: 12px;
+  letter-spacing: -.01em;
+}
+.tab.active {
+  background: var(--editor);
+  box-shadow: inset 0 1px 0 var(--atelier-edge), inset 1px 0 0 var(--atelier-edge), inset -1px 0 0 var(--atelier-edge);
+  font-weight: 680;
+}
+.tab::before {
+  top: auto;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  border-radius: 9px 9px 0 0;
+}
+.tab:hover:not(.active) {
+  background: var(--hover);
+}
+.breadcrumbs {
+  height: 30px;
+  padding-inline: 17px;
+  border-bottom: 1px solid color-mix(in srgb,var(--text) 5%,transparent);
+  font-size: 11px;
+}
+.crumb {
+  border-radius: 6px;
+}
+.statusbar {
+  background: var(--bg);
+  border-top: 1px solid var(--atelier-edge);
+  padding: 0 13px;
+  font-size: 11px;
+}
+.status-item {
+  border-radius: 6px;
+}
+.btn,
+.icon-btn,
+.settings-nav-item,
+.panel-tab,
+.menu-item,
+.palette-row {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 220ms var(--atelier-ease);
+}
+.btn {
+  border-radius: 9px;
+  font-weight: 640;
+}
+.btn:active:not(:disabled),
+.icon-btn:active:not(:disabled) {
+  transform: scale(.97);
+}
+.btn-filled:hover:not(:disabled) {
+  box-shadow: none;
+  filter: brightness(1.04);
+}
+.icon-btn {
+  border-radius: 9px;
+}
+.icon-btn:hover:not(:disabled) .icon,
+.btn:hover:not(:disabled) .icon {
+  animation: none;
+  transform: none;
+}
+:where(.dialog,.modal,.menu,.context-menu,.command-palette,.quick-pick,.tooltip,.popover) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+:where(.dialog,.modal,.menu,.context-menu,.command-palette,.quick-pick,.popover) {
+  background: var(--raised);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 48px color-mix(in srgb,#000 18%,transparent);
+}
+.tooltip {
+  border-radius: 7px;
+  box-shadow: 0 4px 14px color-mix(in srgb,#000 16%,transparent);
+}
+.settings-nav-item {
+  border-radius: 8px;
+}
+:where(input,select,textarea):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+:where(.welcome-card,.preset-card,.settings-card,.extension-card) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--surface);
+  border: 1px solid var(--atelier-edge);
+  box-shadow: none;
+}
+:where(.welcome-card,.preset-card,.settings-card,.extension-card):hover {
+  border-color: var(--border-strong);
+}
+:where(.welcome-card,.preset-card,.settings-card,.extension-card) {
+  transition: background-color 160ms ease,border-color 160ms ease,transform 250ms var(--atelier-ease);
+}
+:where(.welcome-card,.preset-card,.settings-card,.extension-card):active {
+  transform: scale(.99);
+}
+.monaco-editor,
+.monaco-editor .margin,
+.monaco-editor-background {
+  background-color: var(--editor) !important;
+}
+.monaco-editor .current-line {
+  border-color: color-mix(in srgb,var(--accent) 12%,transparent) !important;
+}
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb,var(--text) 18%,transparent);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb,var(--text) 32%,transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
