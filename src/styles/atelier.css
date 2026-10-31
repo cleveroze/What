@@ -288,3 +288,26 @@ body {
     transition-duration: .01ms !important;
   }
 }
+
+/* Activity indicator must follow the real button grid.
+   Atelier uses 10px top padding and 6px spacing rather than the
+   base theme's 2px and 4px: account for both here. */
+.activitybar.vertical .activity-indicator {
+  top: 10px;
+  left: 50%;
+  margin-left: calc(var(--item) / -2);
+  transform: translateY(calc(var(--active-index) * (var(--item) + 6px)));
+}
+.activitybar.horizontal .activity-indicator {
+  top: 3px;
+  left: 4px;
+  margin-left: 0;
+  transform: translateX(calc(var(--active-index) * (var(--item) + 2px)));
+}
+/* Static shapes used by Terminal/Problems/Settings are aligned to
+   their own buttons, without modifying the animated active indicator. */
+.activity-item .activity-shape {
+  inset: 0;
+  margin: auto;
+  pointer-events: none;
+}
