@@ -68,12 +68,17 @@ jobs:
           Copy-Item (Get-ChildItem src-tauri/target/release/bundle/msi/*.msi | Select-Object -First 1).FullName release/Stride.msi
           Copy-Item src-tauri/target/release/stride.exe release/Stride-Portable.exe
           if ($env:GITHUB_REF_NAME -eq "fix/ai-assistant-text-overlap") {
-            $fixNotes = "Stride AI Assistant text overlap fix for Windows 10/11.`n`n" +
-              "Fixes Expressive shape alignment in the activity bar and retains AI text wrapping fixes.`n`n" +
-              "This is an isolated build, separate from the standard latest release.`n`n" +
-              "Built from commit $env:GITHUB_SHA."
-            gh release create stride-ai-fix-v3 release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe `
-              --title "Stride UI Alignment Fix v3 (preview)" --notes $fixNotes --target $env:GITHUB_SHA --prerelease
+            $fixTag = "stride-ai-fix-v3"
+            $fixTitle = "Stride UI Alignment Fix v3 (preview)"
+            $fixNotes = "Fixes Expressive activity icon alignment and AI Assistant text wrapping. Built from commit $env:GITHUB_SHA."
+            gh release view $fixTag *> $null
+            if ($LASTEXITCODE -eq 0) {
+              gh release upload $fixTag release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe --clobber
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              gh release edit $fixTag --title $fixTitle --notes $fixNotes --target $env:GITHUB_SHA
+            } else {
+              gh release create $fixTag release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe --title $fixTitle --notes $fixNotes --target $env:GITHUB_SHA --prerelease
+            }
             exit $LASTEXITCODE
           }
           # Replace the rolling "latest build" release with this build.
