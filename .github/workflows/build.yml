@@ -72,7 +72,7 @@ jobs:
               "Fixes Markdown wrapping, narrow sidebar overflow, long words, inline code and code-block scrolling.`n`n" +
               "This is an isolated build, separate from the standard latest release.`n`n" +
               "Built from commit $env:GITHUB_SHA."
-            gh release create stride-ai-fix-v1 release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe `
+            gh release create stride-ai-fix-v2 release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe `
               --title "Stride AI Assistant Fix (preview)" --notes $fixNotes --target $env:GITHUB_SHA --prerelease
             exit $LASTEXITCODE
           }
