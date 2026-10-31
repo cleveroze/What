@@ -661,8 +661,10 @@
   align-items: flex-end;
 }
 .assistant .ai-answer {
-  flex: 1 1 0%;
-  width: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: calc(100% - 32px);
   overflow-wrap: anywhere;
   word-break: normal;
 }
@@ -735,3 +737,8 @@
   overflow-wrap: anywhere;
   white-space: normal;
 }
+
+/* Width correction for narrow AI sidebar: occupy remaining horizontal space. */
+.assistant .ai-msg.assistant { display: flex; flex-direction: row; align-items: flex-start; }
+.assistant .ai-msg.assistant > .ai-answer { flex: 1 1 auto; width: auto; min-width: 0; max-width: calc(100% - 32px); }
+.assistant .ai-md p { width: auto; }
