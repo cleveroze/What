@@ -6,6 +6,7 @@
 import { build } from "esbuild";
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { OWNER, validateBundle } from "../site/assets/workshop-core.js";
 
 const root = new URL("..", import.meta.url).pathname;
 const extDir = join(root, "extensions");
@@ -15,8 +16,11 @@ mkdirSync(outDir, { recursive: true });
 const builtinSrc = readFileSync(join(root, "src/extensions/builtin.ts"), "utf8");
 const builtinIds = JSON.parse(/BUILTIN_IDS = (\[[^\]]*\])/.exec(builtinSrc)[1]);
 
+// Who may publish updates of each extension (GitHub login); set by the Workshop bot.
+const publishers = JSON.parse(readFileSync(join(extDir, "publishers.json"), "utf8"));
+
 const entries = [];
-for (const id of readdirSync(extDir).sort()) {
+for (const id of readdirSync(extDir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort()) {
   const dir = join(extDir, id);
   const manifest = JSON.parse(readFileSync(join(dir, "extension.json"), "utf8"));
   if (manifest.id !== id) throw new Error(`${id}: folder name must equal manifest id (${manifest.id})`);
@@ -24,7 +28,8 @@ for (const id of readdirSync(extDir).sort()) {
   for (const f of readdirSync(dir)) {
     if (f !== "extension.json") files[f] = readFileSync(join(dir, f), "utf8");
   }
-  if (manifest.main && !files[manifest.main]) throw new Error(`${id}: main file ${manifest.main} is missing`);
+  const { errors } = validateBundle({ manifest, files });
+  if (errors.length) throw new Error(`${id}: ${errors.join(" ")}`);
   writeFileSync(join(outDir, `${id}.stride-ext.json`), JSON.stringify({ manifest, files }, null, 2) + "\n");
   entries.push({
     id,
@@ -42,6 +47,8 @@ for (const id of readdirSync(extDir).sort()) {
       snippets: [...new Set((manifest.contributes?.snippets ?? []).map((s) => s.prefix))],
     },
     builtin: builtinIds.includes(id),
+    publisher: publishers[id] ?? OWNER,
+    hue: manifest.contributes?.themes?.[0]?.accentHue,
     bundle: `extensions/${id}.stride-ext.json`,
   });
 }

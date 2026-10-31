@@ -1,0 +1,24 @@
+name: Publish to the Workshop
+description: Submit a Stride extension. It goes live after the owner reviews and approves it.
+title: "[Workshop] "
+labels: ["workshop-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The easiest way to fill this in is from Stride: **Extensions → your extension → ⋯ → Publish to the Workshop**, or upload your folder at https://cleveroze.github.io/What/publish.html.
+  - type: textarea
+    id: bundle
+    attributes:
+      label: Extension bundle
+      description: The contents of your `.stride-ext.json` file.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes for the reviewer
+      description: Optional. What changed, why a permission is needed, anything else.
+    validations:
+      required: false

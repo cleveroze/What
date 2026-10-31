@@ -76,6 +76,10 @@ export interface RegistryEntry {
   categories?: ExtensionCategory[];
   permissions?: ExtensionPermission[];
   builtin?: boolean;
+  /** GitHub login allowed to publish updates. */
+  publisher?: string;
+  /** Accent hue of the first theme, for tinting the icon. */
+  hue?: number;
   summary?: { commands: string[]; themes: string[]; snippets: string[] };
   /** Bundle URL, relative to the registry file. */
   bundle: string;

@@ -1,0 +1,77 @@
+name: Workshop
+
+# Submissions are GitHub issues created with the "Publish to the Workshop" form.
+# The bot checks them; only the repository owner can approve (label "approved",
+# usually from the admin panel at site/admin.html), which publishes the extension.
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+
+jobs:
+  check:
+    if: >-
+      contains(fromJSON('["opened","edited","reopened"]'), github.event.action) &&
+      contains(github.event.issue.body, '### Extension bundle')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    concurrency:
+      group: workshop-check-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/workshop-bot.mjs check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    if: >-
+      (github.event.action == 'labeled' && github.event.label.name == 'approved' &&
+       contains(github.event.issue.body, '### Extension bundle')) ||
+      (github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'workshop-unpublish'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      actions: write
+    concurrency:
+      group: workshop-publish
+      cancel-in-progress: false
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BRANCH: ${{ github.event.repository.default_branch }}
+      MODE: ${{ github.event.action == 'labeled' && 'publish' || 'unpublish' }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - id: prep
+        run: node scripts/workshop-bot.mjs "$([ "$MODE" = publish ] && echo prepare || echo unpublish)"
+      - if: steps.prep.outputs.publish == 'true'
+        env:
+          EXT_ID: ${{ steps.prep.outputs.id }}
+          EXT_VERSION: ${{ steps.prep.outputs.version }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          npm ci --no-audit --no-fund
+          node scripts/build-workshop.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add extensions site
+          git commit -m "Workshop: $([ "$MODE" = publish ] && echo "publish $EXT_ID $EXT_VERSION" || echo "unpublish $EXT_ID") (#$ISSUE)"
+          git push origin "HEAD:$BRANCH"
+          gh workflow run pages.yml --ref "$BRANCH"
+      - if: steps.prep.outputs.publish == 'true'
+        run: node scripts/workshop-bot.mjs "$([ "$MODE" = publish ] && echo finish || echo unpublished)"
+      - if: failure() && env.MODE == 'publish'
+        run: node scripts/workshop-bot.mjs fail

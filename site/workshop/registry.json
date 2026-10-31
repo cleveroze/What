@@ -22,6 +22,7 @@
         "snippets": []
       },
       "builtin": true,
+      "publisher": "cleveroze",
       "bundle": "extensions/ai-commenter.stride-ext.json"
     },
     {
@@ -43,6 +44,7 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/base64-tools.stride-ext.json"
     },
     {
@@ -64,6 +66,7 @@
         "snippets": []
       },
       "builtin": true,
+      "publisher": "cleveroze",
       "bundle": "extensions/case-converter.stride-ext.json"
     },
     {
@@ -85,6 +88,7 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/color-tools.stride-ext.json"
     },
     {
@@ -109,6 +113,7 @@
         ]
       },
       "builtin": true,
+      "publisher": "cleveroze",
       "bundle": "extensions/html-snippets.stride-ext.json"
     },
     {
@@ -132,6 +137,7 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/json-tools.stride-ext.json"
     },
     {
@@ -153,6 +159,7 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/line-tools.stride-ext.json"
     },
     {
@@ -175,6 +182,7 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/lorem-ipsum.stride-ext.json"
     },
     {
@@ -198,6 +206,8 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
+      "hue": 60,
       "bundle": "extensions/nature-themes.stride-ext.json"
     },
     {
@@ -224,6 +234,7 @@
         ]
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/python-snippets.stride-ext.json"
     },
     {
@@ -248,6 +259,7 @@
         ]
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/react-snippets.stride-ext.json"
     },
     {
@@ -269,6 +281,8 @@
         "snippets": []
       },
       "builtin": true,
+      "publisher": "cleveroze",
+      "hue": 355,
       "bundle": "extensions/sakura-theme.stride-ext.json"
     },
     {
@@ -290,6 +304,7 @@
         "snippets": []
       },
       "builtin": false,
+      "publisher": "cleveroze",
       "bundle": "extensions/timestamp.stride-ext.json"
     },
     {
@@ -311,6 +326,7 @@
         "snippets": []
       },
       "builtin": true,
+      "publisher": "cleveroze",
       "bundle": "extensions/word-count.stride-ext.json"
     }
   ]

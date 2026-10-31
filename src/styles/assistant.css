@@ -735,3 +735,13 @@
   overflow-wrap: anywhere;
   white-space: normal;
 }
+
+.ext-card.flash {
+  animation: ext-flash 1.6s var(--ease-standard, ease);
+}
+@keyframes ext-flash {
+  0%,
+  40% {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+}

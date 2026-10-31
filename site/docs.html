@@ -162,11 +162,12 @@ stride.commands.register("shout", async () =&gt; {
 
       <h2 id="publish">Publish to the Workshop</h2>
       <ol>
-        <li>Fork <a href="https://github.com/cleveroze/What">the repository</a>.</li>
-        <li>Copy your extension folder into <code>extensions/</code>.</li>
-        <li>Run <code>node scripts/build-workshop.mjs</code> — it checks the manifest and adds the extension to the catalog.</li>
-        <li>Open a pull request. Once it is merged, your extension appears in the Workshop in Stride and on this site.</li>
+        <li>In Stride open <b>Extensions</b>, press <b>⋯</b> next to your extension and choose <b>Publish to the Workshop…</b> Or drop the folder on the <a href="publish.html">Publish</a> page.</li>
+        <li>GitHub opens with your extension filled in. Press <b>Create</b> — you need a free GitHub account.</li>
+        <li>A bot checks the format within a minute. If something is wrong, edit the issue and it checks again.</li>
+        <li>@cleveroze reads the code and permissions and approves it. The extension appears in the Workshop — in Stride and on this site — about a minute later.</li>
       </ol>
+      <p>To publish an update, raise <code>version</code> in <code>extension.json</code> and publish again. Only the account that published an extension first can update it.</p>
       <p>To share privately, just send the folder — your friend puts it into their extensions folder. Any <code>.stride-ext.json</code> file downloaded from the Workshop can also be installed with <i>Extensions → ⋯ → Install from file…</i>.</p>
     </article>
   </main>

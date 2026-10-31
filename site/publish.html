@@ -1,38 +1,198 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Publish an extension — Stride Workshop</title><meta name="description" content="Submit your Stride extension for review by the Workshop maintainers.">
-<link rel="icon" href="assets/logo.svg"><link rel="stylesheet" href="assets/site.css">
-<style>
-.publish-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:22px;align-items:start}
-.publish-panel{border-radius:32px;padding:30px;background:var(--surface);border:1px solid var(--border)}
-.publish-panel label{display:block;font-weight:700;margin:20px 0 7px}
-.publish-panel input,.publish-panel textarea,.publish-panel select{width:100%;box-sizing:border-box;background:var(--raised);border:1px solid var(--border);border-radius:17px;color:var(--text);font:inherit;padding:13px 15px}
-.publish-panel textarea{min-height:110px;resize:vertical}
-.publish-panel input:focus-visible,.publish-panel textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.note{font-size:13px;color:var(--muted);margin-top:7px}.steps-list{color:var(--muted);padding-left:24px}.steps-list li{padding:7px 0}
-.publish-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-.status-pill{display:inline-block;background:var(--accent-soft);color:var(--on-accent-soft);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:700}
-@media(max-width:790px){.publish-layout{grid-template-columns:1fr}.publish-panel{padding:22px}}
-</style></head>
-<body><nav class="nav"><a class="brand" href="./"><img src="assets/logo.svg" alt="">Stride</a><a class="link" href="workshop.html">Workshop</a><a class="link" href="docs.html">Developer docs</a><button class="icon-button" id="theme" aria-label="Toggle dark mode"></button><a class="btn filled small" data-download href="#">Download</a></nav>
-<main><section><span class="status-pill">STRIDE WORKSHOP · CREATOR PORTAL</span><h1 style="font-size:clamp(38px,6vw,64px);max-width:800px;margin:22px 0">Share what you've <span style="color:var(--accent)">created.</span></h1><p class="lead">Publish themes, snippets and tools. Every extension is reviewed by the Stride maintainers before it reaches the Workshop.</p>
-<div class="publish-layout">
-<div class="publish-panel"><h2 style="font-size:27px">Submit an extension</h2><p class="note">Your GitHub account is your publisher identity. No extra password or account is needed.</p>
-<form id="submission">
-<label for="name">Extension name</label><input id="name" required maxlength="70" placeholder="My awesome extension">
-<label for="slug">Extension ID</label><input id="slug" required maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="my-awesome-extension"><div class="note">Lowercase letters, numbers and hyphens only. Must match your folder and extension.json ID.</div>
-<label for="repo">Source repository URL</label><input id="repo" required type="url" pattern="https://github\\.com/.+" placeholder="https://github.com/you/my-stride-extension">
-<label for="description">What does it do?</label><textarea id="description" required minlength="20" maxlength="1800" placeholder="Describe features, usage and why it's useful."></textarea>
-<label for="permissions">Permissions needed</label><select id="permissions"><option value="none">None</option><option value="ai">AI</option><option value="network">Network</option><option value="clipboard">Clipboard</option><option value="multiple">Multiple — explained in description</option></select>
-<div class="publish-actions"><button class="btn filled" type="submit">Continue with GitHub ↗</button><a class="btn tonal" href="docs.html">Extension SDK guide</a></div><p class="note" id="message" role="status">Submitting opens a GitHub issue under your signed-in account. An issue is a review request, not an instant publication.</p>
-</form></div>
-<aside class="publish-panel"><h3 style="margin-top:0">How approval works</h3><ol class="steps-list"><li>Sign in to GitHub and submit your extension details.</li><li>Prepare the extension files in your repository. Include <code>extension.json</code> and any required script.</li><li>Open a pull request adding the folder to <code>extensions/&lt;id&gt;/</code>.</li><li>The repository owner reviews permissions, source and behavior.</li><li>Once the pull request is approved and merged, the Workshop catalog is rebuilt and the extension goes live.</li></ol><a class="btn tonal" href="https://github.com/cleveroze/What/pulls">View review queue ↗</a><p class="note">Only maintainers with repository merge permission can approve publication. Closing a request without merging does not publish the plugin.</p></aside>
-</div></section></main><footer>Stride · <a href="workshop.html">Workshop</a> · <a href="https://github.com/cleveroze/What">GitHub</a></footer>
-<script type="module">import "./assets/site.js";
-const form=document.getElementById("submission"),slug=document.getElementById("slug"),name=document.getElementById("name");let touched=false;
-slug.addEventListener("input",()=>{touched=true});name.addEventListener("input",()=>{if(!touched)slug.value=name.value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")});
-form.addEventListener("submit",e=>{e.preventDefault();if(!form.reportValidity())return;
-const repo=document.getElementById("repo").value.trim();try{const u=new URL(repo);if(u.protocol!=="https:"||u.hostname!=="github.com"||u.pathname.split("/").filter(Boolean).length<2)throw Error();}catch{document.getElementById("message").textContent="Please provide a public GitHub repository URL.";return}
-const title="[Extension submission] "+name.value.trim();const body=["## Extension",name.value.trim(),"","## Extension ID",slug.value,"","## Source repository",repo,"","## Description",document.getElementById("description").value.trim(),"","## Permissions",document.getElementById("permissions").value,"","## Review checklist","- [ ] Source code and extension.json are available","- [ ] I will submit the extension files as a pull request","- [ ] I understand publication requires maintainer approval"].join("\n");
-const url=new URL("https://github.com/cleveroze/What/issues/new");url.searchParams.set("title",title);url.searchParams.set("body",body);url.searchParams.set("labels","extension-submission");window.location.href=url.toString();
-});</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Publish · Stride Workshop</title>
+  <meta name="description" content="Send your Stride extension to the Workshop. It goes live after a review.">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="assets/workshop.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="assets/logo.svg" alt="">Stride <span>Workshop</span></a>
+      <nav>
+        <a href="workshop.html">Browse</a>
+        <a href="publish.html" aria-current="page">Publish</a>
+        <a class="optional" href="docs.html">Docs</a>
+      </nav>
+      <button class="icon-btn" id="theme" aria-label="Switch light or dark"></button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="intro">
+      <h1>Publish</h1>
+      <p>Send your extension for review. When @cleveroze approves it, it appears in the Workshop for everyone — usually within a minute.</p>
+    </div>
+
+    <div class="layout">
+      <div>
+        <section class="block">
+          <h2>1 · Choose your extension</h2>
+          <label class="drop" id="drop">
+            <input type="file" id="pick-folder" webkitdirectory hidden>
+            <input type="file" id="pick-file" accept=".json" multiple hidden>
+            <span class="drop-shape" id="drop-shape"></span>
+            <b>Drop the extension folder here</b>
+            <span class="note">or <button type="button" class="link" data-pick="pick-folder">choose a folder</button> · <button type="button" class="link" data-pick="pick-file">choose a .stride-ext.json</button></span>
+          </label>
+          <p class="note">Faster from the app: in Stride open Extensions, press ⋯ next to your extension and choose <b>Publish to the Workshop</b>.</p>
+        </section>
+
+        <section class="block" id="review" hidden>
+          <h2>2 · Check</h2>
+          <div class="preview" id="preview"></div>
+          <ul class="list-check" id="checks"></ul>
+        </section>
+
+        <section class="block" id="send" hidden>
+          <h2>3 · Send for review</h2>
+          <label class="note" for="notes">Notes for the reviewer (optional)</label>
+          <textarea class="area" id="notes" rows="3" placeholder="What it does, what changed, why it needs a permission"></textarea>
+          <div class="row-actions">
+            <button class="btn primary" id="submit">Send for review</button>
+            <button class="btn quiet" id="download">Save .stride-ext.json</button>
+          </div>
+          <p class="note" id="send-note">Opens a review request on GitHub under your account (a free GitHub account is needed). You will get a notification when it is approved.</p>
+        </section>
+      </div>
+
+      <aside class="side">
+        <div class="rows steps">
+          <div><span class="num">1</span><span class="grow">Automatic checks<small>Format, permissions, size — within a minute.</small></span></div>
+          <div><span class="num">2</span><span class="grow">Review by @cleveroze<small>Code and permissions are read by a person.</small></span></div>
+          <div><span class="num">3</span><span class="grow">Published<small>Appears in Stride and on this site.</small></span></div>
+        </div>
+        <a class="btn quiet" href="https://github.com/cleveroze/What/issues?q=is%3Aissue+label%3Aworkshop-submission+author%3A%40me">My submissions</a>
+        <p class="note">Updates: raise the version in extension.json and send it again. Only the original publisher can update an extension.</p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <span>Stride Workshop</span>
+      <a href="workshop.html">Browse</a>
+      <a href="docs.html">Make an extension</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { SHAPE_NAMES } from "./assets/shapes.js";
+    import { MAX_BUNDLE_CHARS, checkAgainstRegistry, submissionUrl, validateBundle } from "./assets/workshop-core.js";
+    import { esc, glyph, hueOf, morph, toast } from "./assets/workshop-ui.js";
+
+    const drop = document.getElementById("drop");
+    let bundle = null;
+    let registry = { extensions: [] };
+    fetch("workshop/registry.json", { cache: "no-cache" }).then((r) => r.json()).then((r) => (registry = r)).catch(() => {});
+
+    document.getElementById("drop-shape").innerHTML = glyph({ id: "publish", name: "+", icon: "clover4" }, 64);
+    morph(document.querySelector("#drop-shape .glyph"), ["clover4", "cookie9", "softBurst", "flower", "pentagon"]);
+
+    for (const b of document.querySelectorAll("[data-pick]")) {
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById(b.dataset.pick).click();
+      });
+    }
+    for (const id of ["pick-folder", "pick-file"]) {
+      document.getElementById(id).addEventListener("change", (e) => load([...e.target.files]));
+    }
+    drop.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      drop.classList.add("over");
+    });
+    drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+    drop.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      drop.classList.remove("over");
+      load(await droppedFiles(e.dataTransfer));
+    });
+
+    /** Files from a drop, including the contents of a dropped folder. */
+    async function droppedFiles(dt) {
+      const entries = [...dt.items].map((i) => i.webkitGetAsEntry?.()).filter(Boolean);
+      if (!entries.length) return [...dt.files];
+      const out = [];
+      const walk = async (entry) => {
+        if (entry.isFile) out.push(await new Promise((res, rej) => entry.file(res, rej)));
+        else if (entry.isDirectory) {
+          const reader = entry.createReader();
+          const children = await new Promise((res, rej) => reader.readEntries(res, rej));
+          for (const c of children) await walk(c);
+        }
+      };
+      for (const e of entries) await walk(e);
+      return out;
+    }
+
+    async function load(files) {
+      try {
+        files = files.filter((f) => !f.name.startsWith("."));
+        const single = files.length === 1 && files[0].name.endsWith(".json") && files[0].name !== "extension.json";
+        if (single) bundle = JSON.parse(await files[0].text());
+        else {
+          const manifestFile = files.find((f) => f.name === "extension.json");
+          if (!manifestFile) throw new Error("No extension.json in the selected files.");
+          const manifest = JSON.parse(await manifestFile.text());
+          const rest = {};
+          for (const f of files) if (f !== manifestFile) rest[f.name] = await f.text();
+          bundle = { manifest, files: rest };
+        }
+        show();
+      } catch (e) {
+        bundle = null;
+        toast(e.message);
+      }
+    }
+
+    function show() {
+      const { errors, warnings } = validateBundle(bundle, { shapeNames: SHAPE_NAMES });
+      const m = bundle.manifest ?? {};
+      const notes = [];
+      if (!errors.length) {
+        const existing = registry.extensions.find((e) => e.id === m.id);
+        if (existing) {
+          notes.push(["warn", `Update of the published ${existing.version} by @${existing.publisher}. Only they can send updates.`]);
+          errors.push(...checkAgainstRegistry(bundle, registry, null).errors);
+        }
+      }
+      const size = JSON.stringify(bundle).length;
+      if (size > MAX_BUNDLE_CHARS) errors.push(`Too big: ${Math.round(size / 1000)} KB of ${MAX_BUNDLE_CHARS / 1000} KB.`);
+      document.getElementById("review").hidden = false;
+      document.getElementById("preview").innerHTML = m.id
+        ? `<div class="tile static" style="--h:${hueOf({ id: m.id }, m)}">${glyph({ id: m.id, name: m.name, icon: m.icon }, 52, m)}<h3>${esc(m.name)}</h3><p>${esc(m.description)}</p><footer><span>${esc(m.version)}</span><span>${esc(Object.keys(bundle.files ?? {}).join(", "))}</span></footer></div>`
+        : "";
+      document.getElementById("checks").innerHTML = [
+        ...errors.map((e) => `<li class="bad">${esc(e)}</li>`),
+        ...notes.map(([k, t]) => `<li class="${k}">${esc(t)}</li>`),
+        ...warnings.map((w) => `<li class="warn">${esc(w)}</li>`),
+        ...(errors.length ? [] : [`<li class="ok">Ready to send.</li>`]),
+      ].join("");
+      document.getElementById("send").hidden = errors.length > 0;
+    }
+
+    document.getElementById("download").addEventListener("click", () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" }));
+      a.download = `${bundle.manifest.id}.stride-ext.json`;
+      a.click();
+    });
+
+    document.getElementById("submit").addEventListener("click", async () => {
+      const { url, prefilled, json } = submissionUrl(bundle);
+      const target = new URL(url);
+      const notes = document.getElementById("notes").value.trim();
+      if (notes && prefilled) target.searchParams.set("notes", notes);
+      if (!prefilled) {
+        await navigator.clipboard.writeText(json).catch(() => {});
+        document.getElementById("send-note").textContent = "The extension is too big for a link, so it was copied: paste it into the “Extension bundle” field on GitHub.";
+      }
+      window.open(target.href.length < 8000 ? target.href : url, "_blank", "noopener");
+    });
+  </script>
+</body>
+</html>

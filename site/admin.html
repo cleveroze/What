@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Review · Stride Workshop</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="assets/workshop.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="workshop.html"><img src="assets/logo.svg" alt="">Stride <span>Review</span></a>
+      <nav id="who"></nav>
+      <button class="icon-btn" id="theme" aria-label="Switch light or dark"></button>
+    </div>
+  </header>
+
+  <!-- Sign in -->
+  <main class="wrap gate" id="gate" hidden>
+    <span id="gate-shape"></span>
+    <h1>Review</h1>
+    <p>Approving extensions is reserved for @cleveroze. Sign in with a GitHub token that can write issues in cleveroze/What.</p>
+    <form id="login" class="gate-form">
+      <label class="field"><input id="token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false" aria-label="GitHub token" required></label>
+      <label class="note check"><input type="checkbox" id="remember"> Remember on this device</label>
+      <button class="btn primary" type="submit">Sign in</button>
+    </form>
+    <p class="note">No token yet? <a id="token-link" href="#" target="_blank" rel="noopener">Create one</a> — repository <b>cleveroze/What</b>, permission <b>Issues: Read and write</b>. It is sent only to api.github.com.</p>
+    <p class="note bad-text" id="gate-error" role="alert"></p>
+  </main>
+
+  <!-- Panel -->
+  <main class="wrap" id="panel" hidden>
+    <div class="intro">
+      <h1>Review</h1>
+      <div class="chips" id="tabs" role="tablist">
+        <button class="chip" aria-pressed="true" data-tab="queue">Waiting <span id="n-queue"></span></button>
+        <button class="chip" aria-pressed="false" data-tab="history">History</button>
+        <button class="chip" aria-pressed="false" data-tab="catalog">Published</button>
+      </div>
+    </div>
+    <div class="admin">
+      <div class="admin-list" id="list"></div>
+      <div class="admin-detail" id="detail"></div>
+    </div>
+  </main>
+
+  <dialog id="ask" class="sheet-dialog">
+    <form method="dialog">
+      <h3 id="ask-title"></h3>
+      <p class="note" id="ask-text"></p>
+      <textarea class="area" id="ask-input" rows="4"></textarea>
+      <div class="row-actions end">
+        <button class="btn quiet" value="cancel">Cancel</button>
+        <button class="btn primary" value="ok" id="ask-ok"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module">
+    import { SHAPE_NAMES } from "./assets/shapes.js";
+    import { APPROVAL_MARK, LABELS, OWNER, PERMISSIONS, REPO, checkAgainstRegistry, parseSubmission, sha256, validateBundle } from "./assets/workshop-core.js";
+    import { codeViewer, contributions, esc, glyph, hueOf, morph, toast } from "./assets/workshop-ui.js";
+
+    const API = `https://api.github.com/repos/${REPO}`;
+    const $ = (id) => document.getElementById(id);
+    let token = "";
+    let tab = "queue";
+    let registry = { extensions: [] };
+    let issues = [];
+    let selected = null;
+
+    // ---------- GitHub ----------
+    async function gh(path, { method = "GET", body } = {}) {
+      const res = await fetch(path.startsWith("https://") ? path : `${API}${path}`, {
+        method,
+        headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json", ...(body ? { "content-type": "application/json" } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      if (res.status === 401) throw Object.assign(new Error("The token is not valid or has expired."), { auth: true });
+      if (!res.ok && !(method === "POST" && path === "/labels" && res.status === 422)) {
+        const msg = (await res.json().catch(() => ({}))).message;
+        throw new Error(`GitHub: ${msg || res.status}`);
+      }
+      return res.status === 204 ? null : res.json().catch(() => null);
+    }
+    const ensureLabel = (name) => gh("/labels", { method: "POST", body: { name } });
+
+    // ---------- Sign in ----------
+    const store = () => {
+      try {
+        return localStorage.getItem("stride-admin-token") ? localStorage : sessionStorage;
+      } catch {
+        return null;
+      }
+    };
+    function forget() {
+      try {
+        localStorage.removeItem("stride-admin-token");
+        sessionStorage.removeItem("stride-admin-token");
+      } catch {}
+    }
+
+    async function signIn(t, remember) {
+      token = t.trim();
+      const me = await gh("https://api.github.com/user");
+      if (me.login.toLowerCase() !== OWNER.toLowerCase()) {
+        token = "";
+        forget();
+        throw new Error(`Signed in as @${me.login}. Only @${OWNER} can review the Workshop.`);
+      }
+      try {
+        (remember ? localStorage : sessionStorage).setItem("stride-admin-token", token);
+      } catch {}
+      $("who").innerHTML = `<a href="https://github.com/${esc(me.login)}">@${esc(me.login)}</a><a href="#" id="logout">Sign out</a>`;
+      $("logout").onclick = (e) => {
+        e.preventDefault();
+        forget();
+        location.reload();
+      };
+      $("gate").hidden = true;
+      $("panel").hidden = false;
+      await refresh();
+    }
+
+    function showGate(error = "") {
+      $("panel").hidden = true;
+      $("gate").hidden = false;
+      $("gate-error").textContent = error;
+      $("gate-shape").innerHTML = glyph({ id: "admin", name: "S", icon: "softBurst" }, 96);
+      morph($("gate-shape").querySelector(".glyph"), ["softBurst", "cookie9", "clover4", "flower"]);
+    }
+
+    const tokenUrl = new URL("https://github.com/settings/personal-access-tokens/new");
+    tokenUrl.searchParams.set("name", "Stride Workshop review");
+    tokenUrl.searchParams.set("description", "Approve and reject Workshop submissions from the review panel");
+    tokenUrl.searchParams.set("target_name", OWNER);
+    tokenUrl.searchParams.set("expires_in", "90");
+    tokenUrl.searchParams.set("issues", "write");
+    $("token-link").href = tokenUrl.href;
+
+    $("login").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        await signIn($("token").value, $("remember").checked);
+      } catch (err) {
+        showGate(err.message);
+      }
+    });
+
+    // ---------- Data ----------
+    async function refresh() {
+      $("list").innerHTML = `<p class="note pad">Loading…</p>`;
+      $("detail").innerHTML = "";
+      registry = await fetch(`https://raw.githubusercontent.com/${REPO}/HEAD/site/workshop/registry.json?t=${Date.now()}`)
+        .then((r) => r.json())
+        .catch(() => fetch("workshop/registry.json").then((r) => r.json()));
+      const state = tab === "queue" ? "open" : "closed";
+      issues = tab === "catalog" ? [] : await gh(`/issues?labels=${LABELS.submission}&state=${state}&per_page=50&sort=created&direction=${tab === "queue" ? "asc" : "desc"}`);
+      if (tab === "queue") $("n-queue").textContent = issues.length || "";
+      for (const issue of issues) issue.parsed = parseSubmission(issue.body ?? "");
+      renderList();
+    }
+
+    const labelsOf = (issue) => issue.labels.map((l) => l.name);
+    function status(issue) {
+      const l = labelsOf(issue);
+      if (l.includes(LABELS.published)) return ["ok", "Published"];
+      if (l.includes(LABELS.rejected)) return ["bad", "Rejected"];
+      if (l.includes(LABELS.approved)) return ["ok", "Publishing"];
+      if (l.includes(LABELS.changes)) return ["warn", "Changes requested"];
+      if (l.includes(LABELS.invalid) || issue.parsed?.error) return ["bad", "Checks failed"];
+      if (issue.state === "closed") return ["", "Closed"];
+      return ["", "Waiting"];
+    }
+
+    function renderList() {
+      const list = $("list");
+      if (tab === "catalog") {
+        const rows = registry.extensions.map(
+          (e) => `<button class="admin-row" data-ext="${esc(e.id)}">${glyph(e, 40)}<span class="grow"><b>${esc(e.name)}</b><small>${esc(e.version)} · ${e.builtin ? "built in" : "@" + esc(e.publisher)}</small></span></button>`,
+        );
+        list.innerHTML = rows.join("");
+        return;
+      }
+      if (!issues.length) {
+        list.innerHTML = `<p class="note pad">${tab === "queue" ? "Nothing waiting. New submissions appear here." : "No history yet."}</p>`;
+        $("detail").innerHTML = "";
+        return;
+      }
+      list.innerHTML = issues
+        .map((issue) => {
+          const m = issue.parsed.bundle?.manifest ?? {};
+          const [kind, text] = status(issue);
+          const name = typeof m.name === "string" ? m.name : issue.title;
+          return `<button class="admin-row" data-issue="${issue.number}" aria-current="${selected === issue.number}">${glyph({ id: String(m.id ?? issue.number), name, icon: SHAPE_NAMES.includes(m.icon) ? m.icon : "cookie9" }, 40)}
+            <span class="grow"><b>${esc(name)}</b><small>${esc(typeof m.version === "string" ? m.version : "")} · @${esc(issue.user.login)}</small></span><span class="pill ${kind}">${esc(text)}</span></button>`;
+        })
+        .join("");
+      const first = issues.find((i) => i.number === selected) ?? issues[0];
+      showIssue(first.number);
+    }
+
+    $("list").addEventListener("click", (e) => {
+      const row = e.target.closest(".admin-row");
+      if (!row) return;
+      if (row.dataset.issue) showIssue(Number(row.dataset.issue));
+      else showPublished(row.dataset.ext);
+    });
+
+    // ---------- Submission ----------
+    async function showIssue(number) {
+      selected = number;
+      for (const r of document.querySelectorAll(".admin-row")) r.setAttribute("aria-current", String(Number(r.dataset.issue) === number));
+      const issue = issues.find((i) => i.number === number);
+      const d = $("detail");
+      const p = issue.parsed;
+      const head = `<div class="admin-head"><a class="note" href="${esc(issue.html_url)}" target="_blank" rel="noopener">#${issue.number} on GitHub</a> · <span class="note">from <a href="https://github.com/${esc(issue.user.login)}">@${esc(issue.user.login)}</a>, ${new Date(issue.created_at).toLocaleDateString()}</span></div>`;
+      if (p.error) {
+        d.innerHTML = `${head}<h2 class="admin-title">${esc(issue.title)}</h2><ul class="list-check"><li class="bad">${esc(p.error)}</li></ul>${actions(issue, false)}`;
+        wire(issue, null);
+        return;
+      }
+      const bundle = p.bundle;
+      const m = bundle.manifest ?? {};
+      const { errors, warnings } = validateBundle(bundle, { shapeNames: SHAPE_NAMES });
+      const reg = errors.length ? { errors: [], existing: registry.extensions.find((e) => e.id === m.id) } : checkAgainstRegistry(bundle, registry, issue.user.login);
+      errors.push(...reg.errors);
+      const existing = reg.existing;
+      let adds = "";
+      try {
+        adds = contributions(m);
+      } catch {}
+      const perms = Array.isArray(m.permissions) ? m.permissions : [];
+      d.innerHTML = `${head}
+        <div class="hero small">${glyph({ id: String(m.id), name: String(m.name ?? "?"), icon: SHAPE_NAMES.includes(m.icon) ? m.icon : "cookie9" }, 72, m)}
+          <div><h2 class="admin-title">${esc(m.name)}</h2>
+          <div class="note">${esc(m.id)} · ${existing ? `update ${esc(existing.version)} → <b>${esc(m.version)}</b>` : `new · <b>${esc(m.version)}</b>`} · by ${esc(m.author)}</div></div></div>
+        <p class="lead small">${esc(m.description)}</p>
+        <ul class="list-check">${[
+          ...errors.map((e) => `<li class="bad">${esc(e)}</li>`),
+          ...warnings.map((w) => `<li class="warn">${esc(w)}</li>`),
+          ...(errors.length ? [] : ["<li class=\"ok\">All checks passed.</li>"]),
+        ].join("")}</ul>
+        ${p.notes ? `<section class="block"><h2>Notes from the author</h2><div class="perm">${esc(p.notes)}</div></section>` : ""}
+        <section class="block"><h2>Permissions</h2>${perms.length ? perms.map((x) => `<div class="perm"><b>${esc(x)}</b>${esc(PERMISSIONS[x] ?? "Unknown")}</div>`).join("") : `<div class="perm">None — sandboxed, no internet.</div>`}</section>
+        ${adds ? `<section class="block"><h2>Adds</h2><div class="rows">${adds}</div></section>` : ""}
+        <section class="block" id="code"><h2>Code${existing ? " · changes since " + esc(existing.version) : ""}</h2></section>
+        ${issue.state === "open" ? actions(issue, errors.length === 0) : ""}`;
+      let previous = null;
+      if (existing) {
+        try {
+          const old = await fetch(`https://raw.githubusercontent.com/${REPO}/HEAD/site/workshop/${existing.bundle}`).then((r) => r.json());
+          previous = { ...old.files, "extension.json": JSON.stringify(old.manifest, null, 2) };
+        } catch {}
+      }
+      if (selected !== number) return;
+      const files = Object.fromEntries(Object.entries(bundle.files ?? {}).map(([k, v]) => [k, String(v)]));
+      $("code").append(codeViewer({ ...files, "extension.json": JSON.stringify(m, null, 2) }, previous));
+      wire(issue, p.raw);
+    }
+
+    function actions(issue, canApprove) {
+      return `<div class="admin-actions">
+        <button class="btn primary" data-act="approve" ${canApprove ? "" : "disabled"}>Approve and publish</button>
+        <button class="btn quiet" data-act="changes">Request changes</button>
+        <button class="btn danger" data-act="reject">Reject</button>
+      </div>`;
+    }
+
+    function ask(title, text, ok, value = "") {
+      $("ask-title").textContent = title;
+      $("ask-text").textContent = text;
+      $("ask-input").value = value;
+      $("ask-ok").textContent = ok;
+      $("ask").showModal();
+      return new Promise((resolve) => $("ask").addEventListener("close", () => resolve($("ask").returnValue === "ok" ? $("ask-input").value.trim() : null), { once: true }));
+    }
+
+    function wire(issue, raw) {
+      for (const b of $("detail").querySelectorAll("[data-act]")) {
+        b.onclick = async () => {
+          const act = b.dataset.act;
+          try {
+            if (act === "approve") {
+              const note = await ask("Approve and publish?", "It goes live for everyone in about a minute. An optional message for the author:", "Publish", "Thanks — published!");
+              if (note === null) return;
+              b.disabled = true;
+              const hash = await sha256(raw);
+              await gh(`/issues/${issue.number}/comments`, { method: "POST", body: { body: `${note || "Approved."}\n\n<!-- ${APPROVAL_MARK} sha256=${hash} -->` } });
+              await ensureLabel(LABELS.approved);
+              await gh(`/issues/${issue.number}/labels`, { method: "POST", body: { labels: [LABELS.approved] } });
+              toast("Approved. Publishing takes about a minute.");
+            } else if (act === "changes") {
+              const note = await ask("Request changes", "Tell the author what to fix. They edit the issue and the checks run again.", "Send");
+              if (!note) return;
+              await gh(`/issues/${issue.number}/comments`, { method: "POST", body: { body: note } });
+              await ensureLabel(LABELS.changes);
+              await gh(`/issues/${issue.number}/labels`, { method: "POST", body: { labels: [LABELS.changes] } });
+              toast("Sent to the author.");
+            } else if (act === "reject") {
+              const note = await ask("Reject this submission?", "The request is closed. Say why:", "Reject");
+              if (!note) return;
+              await gh(`/issues/${issue.number}/comments`, { method: "POST", body: { body: note } });
+              await ensureLabel(LABELS.rejected);
+              await gh(`/issues/${issue.number}/labels`, { method: "POST", body: { labels: [LABELS.rejected] } });
+              await gh(`/issues/${issue.number}`, { method: "PATCH", body: { state: "closed", state_reason: "not_planned" } });
+              toast("Rejected.");
+            }
+            await refresh();
+          } catch (e) {
+            b.disabled = false;
+            if (e.auth) return showGate(e.message);
+            toast(e.message, 5000);
+          }
+        };
+      }
+    }
+
+    // ---------- Published ----------
+    function showPublished(id) {
+      const e = registry.extensions.find((x) => x.id === id);
+      for (const r of document.querySelectorAll(".admin-row")) r.setAttribute("aria-current", String(r.dataset.ext === id));
+      $("detail").innerHTML = `<div class="hero small">${glyph(e, 72)}<div><h2 class="admin-title">${esc(e.name)}</h2><div class="note">${esc(e.id)} · ${esc(e.version)} · ${e.builtin ? "built into Stride" : "@" + esc(e.publisher)}</div></div></div>
+        <p class="lead small">${esc(e.description)}</p>
+        <div class="admin-actions"><a class="btn quiet" href="workshop.html#${esc(e.id)}">Open in the Workshop</a>
+        ${e.builtin ? "" : `<button class="btn danger" id="unpublish">Remove from the Workshop</button>`}</div>`;
+      $("unpublish")?.addEventListener("click", async () => {
+        const note = await ask(`Remove ${e.name}?`, "It disappears from the Workshop. People who installed it keep their copy. Reason (optional):", "Remove");
+        if (note === null) return;
+        try {
+          await ensureLabel(LABELS.unpublish);
+          await gh("/issues", { method: "POST", body: { title: `[Workshop] Unpublish ${e.id}`, body: note || "Removed from the review panel.", labels: [LABELS.unpublish] } });
+          toast("Removing — takes about a minute.");
+        } catch (err) {
+          toast(err.message, 5000);
+        }
+      });
+    }
+
+    $("tabs").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-tab]");
+      if (!b) return;
+      tab = b.dataset.tab;
+      selected = null;
+      for (const c of $("tabs").querySelectorAll("[data-tab]")) c.setAttribute("aria-pressed", String(c === b));
+      refresh().catch((err) => (err.auth ? showGate(err.message) : toast(err.message, 5000)));
+    });
+
+    // ---------- Start ----------
+    let saved = "";
+    let remembered = false;
+    try {
+      saved = store()?.getItem("stride-admin-token") ?? "";
+      remembered = !!localStorage.getItem("stride-admin-token");
+    } catch {}
+    if (saved) signIn(saved, remembered).catch((e) => showGate(e.message));
+    else showGate();
+  </script>
+</body>
+</html>

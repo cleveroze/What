@@ -85,6 +85,8 @@ Keys are stored only on your computer. Right-click in the editor for *Explain*, 
 Extensions add themes, snippets and commands (`Ctrl+Shift+X`). Code runs in a sandboxed Web Worker with no network access unless the `network` permission is granted. Five built-in examples ship with the app; more are in the **Workshop** — in the app and at https://cleveroze.github.io/What/workshop.html.
 
 - Sources: [`extensions/`](extensions) · guide: [`site/docs.html`](site/docs.html) (https://cleveroze.github.io/What/docs.html)
+- **Publishing**: Extensions → ⋯ → *Publish to the Workshop* (or `site/publish.html`) opens a GitHub issue with the bundle. The *Workshop* workflow checks it; it is published only after the repository owner approves it in the review panel (`site/admin.html`, signed in with a fine-grained token with Issues: write) — the bot then commits it to `extensions/` and redeploys the site.
+- `stride://install/<id>` links (the website's *Install in Stride* button) open the running app and install after confirmation.
 - `npm run build:site` rebuilds the Workshop catalog (`site/workshop/registry.json`) and site assets; the *Website* workflow deploys `site/` to GitHub Pages.
 
 ## Architecture

@@ -11,6 +11,7 @@ import {
   installFromWorkshop,
   openExtensionsFolder,
   openWorkshopSite,
+  publishToWorkshop,
   reloadExtensions,
   setExtensionEnabled,
   uninstallExtension,
@@ -21,7 +22,7 @@ import { useStore } from "../../lib/store";
 import { join } from "../../lib/path";
 import { openFile } from "../../state/editors";
 import { settingsStore } from "../../state/settings";
-import { confirm, notify, openMenuAt } from "../../state/ui";
+import { confirm, notify, openMenuAt, quickPick } from "../../state/ui";
 import { EmptyState } from "../EmptyState";
 import { Icon } from "../Icon";
 import { LoadingIndicator, Shape } from "../Shape";
@@ -57,7 +58,7 @@ function Card({
 }) {
   const full = manifest as ExtensionManifest;
   return (
-    <div className={`ext-card ${expanded ? "expanded" : ""}`} style={{ ["--i" as string]: Math.min(index, 12) }}>
+    <div className={`ext-card ${expanded ? "expanded" : ""}`} data-ext-id={manifest.id} style={{ ["--i" as string]: Math.min(index, 12) }}>
       <button type="button" className="ext-card-main" onClick={onToggle} aria-expanded={expanded}>
         <span className="ext-icon">
           <Shape name={(manifest.icon as ShapeName) ?? "cookie9"} size={36} fill="var(--accent-soft)" />
@@ -70,7 +71,7 @@ function Card({
           </span>
           <span className="ext-desc">{manifest.description}</span>
           <span className="ext-meta">
-            {manifest.author} · v{manifest.version}
+            {"publisher" in manifest && manifest.publisher && !manifest.builtin ? `@${manifest.publisher}` : manifest.author} · v{manifest.version}
             {(manifest.permissions ?? []).map((p) => (
               <span key={p} className="ext-perm">
                 {PERMISSION_LABELS[p] ?? p}
@@ -130,6 +131,21 @@ function Card({
   );
 }
 
+/** Expands and scrolls to the extension a link or command asked for. */
+function useFocus(setOpen: (id: string) => void, ready: boolean) {
+  const view = useStore(extensionsStore, (s) => s.view);
+  useEffect(() => {
+    if (!view.focus || !ready) return;
+    setOpen(view.focus);
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(`[data-ext-id="${CSS.escape(view.focus!)}"]`);
+      el?.scrollIntoView({ block: "center", behavior: "smooth" });
+      el?.classList.add("flash");
+      setTimeout(() => el?.classList.remove("flash"), 1600);
+    });
+  }, [view.nonce, ready]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
 async function copyBuiltin(ext: InstalledExtension) {
   const name = `${ext.manifest.name} (my copy)`;
   const id = `${ext.manifest.id}-copy`;
@@ -143,6 +159,8 @@ function Installed({ query }: { query: string }) {
   const { installed, running, errors } = useStore(extensionsStore, (s) => s);
   const disabled = useStore(settingsStore, (s) => s["extensions.disabled"]);
   const [open, setOpen] = useState<string | null>(null);
+  const registry = useStore(extensionsStore, (s) => s.registry);
+  useFocus(setOpen, installed.length > 0);
   const list = installed.filter((e) => !query || `${e.manifest.name} ${e.manifest.description}`.toLowerCase().includes(query.toLowerCase()));
   return (
     <div className="ext-list">
@@ -171,7 +189,10 @@ function Installed({ query }: { query: string }) {
                         : [
                             { label: "Edit code", disabled: !ext.manifest.main, run: () => ext.path && ext.manifest.main && openFile(join(ext.path, ext.manifest.main)) },
                             { label: "Edit extension.json", run: () => ext.path && openFile(join(ext.path, "extension.json")) },
+                            "separator" as const,
+                            { label: "Publish to the Workshop…", run: () => publishToWorkshop(ext) },
                           ]),
+                      ...(registry?.some((r) => r.id === ext.manifest.id) || ext.builtin ? [{ label: "Open in the Workshop website", run: () => openWorkshopSite(ext.manifest.id) }] : []),
                       "separator" as const,
                       {
                         label: "Uninstall",
@@ -201,6 +222,10 @@ function Workshop({ query }: { query: string }) {
   useEffect(() => {
     fetchRegistry();
   }, []);
+  useFocus((id) => {
+    setOpen(id);
+    setCategory("All");
+  }, !!registry);
   const categories = useMemo(() => ["All", ...new Set((registry ?? []).flatMap((e) => e.categories ?? []))], [registry]);
   if (registryLoading && !registry) {
     return (
@@ -246,14 +271,19 @@ function Workshop({ query }: { query: string }) {
               actions={
                 busy[entry.id] ? (
                   <LoadingIndicator size={22} label="Installing" />
-                ) : have && !updatable ? (
-                  <span className="ext-installed">
-                    <Icon name="check" size={13} /> Installed
-                  </span>
                 ) : (
-                  <Button variant={updatable ? "tonal" : "filled"} onClick={() => installFromWorkshop(entry)}>
-                    {updatable ? "Update" : "Install"}
-                  </Button>
+                  <>
+                    {have && !updatable ? (
+                      <span className="ext-installed">
+                        <Icon name="check" size={13} /> Installed
+                      </span>
+                    ) : (
+                      <Button variant={updatable ? "tonal" : "filled"} onClick={() => installFromWorkshop(entry)}>
+                        {updatable ? "Update" : "Install"}
+                      </Button>
+                    )}
+                    <IconButton icon="external" label="Open on the Workshop website" onClick={() => openWorkshopSite(entry.id)} />
+                  </>
                 )
               }
             />
@@ -265,8 +295,19 @@ function Workshop({ query }: { query: string }) {
   );
 }
 
+async function pickAndPublish() {
+  const mine = extensionsStore.get().installed.filter((x) => !x.builtin);
+  if (!mine.length) return notify("info", "Nothing to publish yet", "Create an extension first: ⋯ → Create a new extension.");
+  const ext = await quickPick(
+    mine.map((x) => ({ label: x.manifest.name, description: `${x.manifest.id} · v${x.manifest.version}`, value: x })),
+    "Which extension do you want to publish?",
+  );
+  if (ext) publishToWorkshop(ext);
+}
+
 export function ExtensionsView() {
-  const [tab, setTab] = useState<"installed" | "workshop">("installed");
+  const tab = useStore(extensionsStore, (s) => s.view.tab);
+  const setTab = (t: "installed" | "workshop") => extensionsStore.set((s) => ({ ...s, view: { ...s.view, tab: t, focus: null } }));
   const [query, setQuery] = useState("");
   const count = useStore(extensionsStore, (s) => s.installed.length);
 
@@ -300,7 +341,8 @@ export function ExtensionsView() {
                 },
                 { label: "Open extensions folder", run: openExtensionsFolder },
                 "separator",
-                { label: "Open the Workshop website", run: openWorkshopSite },
+                { label: "Open the Workshop website", run: () => openWorkshopSite() },
+                { label: "Publish an extension…", run: pickAndPublish },
               ]);
             }}
           />

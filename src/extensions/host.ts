@@ -14,6 +14,9 @@ import { load, persist } from "../state/persist";
 import { getSetting, setSetting, settingsStore } from "../state/settings";
 import { notify, quickPick, reportError, showDialog } from "../state/ui";
 import { setExtensionPresets } from "../theme/presets";
+import { SHAPE_NAMES } from "../lib/shapes";
+import { validateBundle, submissionUrl } from "../../site/assets/workshop-core.js";
+import { showSidebarView } from "../state/workspace";
 import { BUILTIN_EXTENSIONS } from "./builtin";
 import { sandboxPrelude } from "./sandbox";
 import { validateManifest, type ExtensionBundle, type ExtensionManifest, type InstalledExtension, type RegistryEntry } from "./types";
@@ -30,6 +33,8 @@ export interface ExtensionsState {
   registryError: string | null;
   registryLoading: boolean;
   busy: Record<string, boolean>;
+  /** Which tab the Extensions panel shows and which extension to bring into view. */
+  view: { tab: "installed" | "workshop"; focus: string | null; nonce: number };
 }
 
 export const extensionsStore = createStore<ExtensionsState>({
@@ -41,6 +46,7 @@ export const extensionsStore = createStore<ExtensionsState>({
   registryError: null,
   registryLoading: false,
   busy: {},
+  view: { tab: "installed", focus: null, nonce: 0 },
 });
 
 interface Runtime {
@@ -401,17 +407,19 @@ export function setExtensionEnabled(id: string, enabled: boolean) {
   setSetting("extensions.disabled", enabled ? disabled : [...disabled, id]);
 }
 
-export async function installBundle(bundle: ExtensionBundle) {
+export async function installBundle(bundle: ExtensionBundle, opts: { alwaysAsk?: boolean } = {}) {
   const problem = validateManifest(bundle?.manifest);
   if (problem) throw new Error(`Invalid extension: ${problem}`);
   const { manifest, files } = bundle;
   const perms = manifest.permissions ?? [];
-  if (perms.length) {
+  if (perms.length || opts.alwaysAsk) {
     const labels: Record<string, string> = { ai: "use your AI assistant (and your AI provider credits)", network: "access the internet", clipboard: "write to your clipboard" };
     const ok = await showDialog({
       title: `Install “${manifest.name}”?`,
-      message: `This extension asks to: ${perms.map((p) => labels[p] ?? p).join(", ")}.`,
-      detail: "Extensions run in a sandbox and can't touch your files, but only install ones you trust.",
+      message: perms.length ? `This extension asks to: ${perms.map((p) => labels[p] ?? p).join(", ")}.` : `${manifest.description}`,
+      detail: perms.length
+        ? "Extensions run in a sandbox and can't touch your files, but only install ones you trust."
+        : `Version ${manifest.version} by ${manifest.author}. Runs in a sandbox without internet or file access.`,
       buttons: [
         { label: "Cancel", value: false },
         { label: "Install", value: true, primary: true },
@@ -432,12 +440,12 @@ export async function installBundle(bundle: ExtensionBundle) {
   return true;
 }
 
-export async function installFromWorkshop(entry: RegistryEntry) {
+export async function installFromWorkshop(entry: RegistryEntry, opts: { alwaysAsk?: boolean } = {}) {
   extensionsStore.set((s) => ({ ...s, busy: { ...s.busy, [entry.id]: true } }));
   try {
     const res = await fetch(new URL(entry.bundle, REGISTRY_URL));
     if (!res.ok) throw new Error(`Download failed (${res.status})`);
-    if (await installBundle(await res.json())) notify("success", `Installed ${entry.name}`);
+    if (await installBundle(await res.json(), opts)) notify("success", `Installed ${entry.name}`);
   } catch (e) {
     reportError(`Cannot install ${entry.name}`, e);
   } finally {
@@ -468,7 +476,8 @@ export async function uninstallExtension(ext: InstalledExtension) {
 
 export async function fetchRegistry(force = false) {
   const s = extensionsStore.get();
-  if (s.registryLoading || (s.registry && !force)) return;
+  if (s.registryLoading && !force) return;
+  if (s.registry && !force) return;
   extensionsStore.update({ registryLoading: true, registryError: null });
   try {
     const res = await fetch(`${REGISTRY_URL}?t=${Date.now()}`);
@@ -531,5 +540,79 @@ export async function openExtensionsFolder() {
   }
 }
 
-export const openWorkshopSite = () => preview.openExternal(WORKSHOP_URL);
+export const openWorkshopSite = (id?: string) => preview.openExternal(id ? `${WORKSHOP_URL}#${encodeURIComponent(id)}` : WORKSHOP_URL);
+
+/** Opens the Extensions panel on a tab and scrolls an extension into view. */
+export function showExtension(tab: "installed" | "workshop", focus: string | null = null) {
+  showSidebarView("extensions");
+  extensionsStore.set((s) => ({ ...s, view: { tab, focus, nonce: s.view.nonce + 1 } }));
+}
+
+/** `stride://install/<id>` from the Workshop website. Always asks first. */
+export async function installById(id: string) {
+  showExtension("workshop", id);
+  await fetchRegistry(true);
+  const { registry, installed } = extensionsStore.get();
+  const entry = registry?.find((e) => e.id === id);
+  if (!entry) return reportError("Not in the Workshop", `There is no extension “${id}” in the Workshop.`);
+  const have = installed.find((x) => x.manifest.id === id);
+  if (have && (have.builtin || have.manifest.version === entry.version)) {
+    showExtension("installed", id);
+    return notify("info", `${entry.name} is already installed`);
+  }
+  await installFromWorkshop(entry, { alwaysAsk: true });
+}
+
+/** Reads an installed extension back into a bundle. */
+async function bundleOf(ext: InstalledExtension): Promise<ExtensionBundle> {
+  const files: Record<string, string> = {};
+  for (const e of await fs.readDir(ext.path!)) {
+    if (e.isDir || e.name === "extension.json" || e.name.startsWith(".")) continue;
+    files[e.name] = (await fs.readText(e.path)).content;
+  }
+  return { manifest: ext.manifest, files };
+}
+
+/** Sends a user's extension for review: opens the Workshop submission form on GitHub. */
+export async function publishToWorkshop(ext: InstalledExtension) {
+  if (!ext.path) return;
+  try {
+    const bundle = await bundleOf(ext);
+    const { errors, warnings } = validateBundle(bundle, { shapeNames: SHAPE_NAMES });
+    await fetchRegistry(true);
+    const published = extensionsStore.get().registry?.find((e) => e.id === bundle.manifest.id);
+    if (published && published.version === bundle.manifest.version) errors.push(`Version ${published.version} is already published — raise “version” in extension.json.`);
+    if (errors.length) {
+      await showDialog({
+        title: "Fix these before publishing",
+        message: errors.join("\n"),
+        detail: "Edit extension.json, save, and try again.",
+        buttons: [{ label: "OK", value: true, primary: true }],
+        cancelValue: false,
+      });
+      return;
+    }
+    const go = await showDialog({
+      title: `Publish “${bundle.manifest.name}” ${bundle.manifest.version}?`,
+      message: published
+        ? `This is an update of the published ${published.version} by @${published.publisher}. Only they can publish updates.`
+        : "GitHub opens with your extension filled in. Press “Create” there to send it.",
+      detail: ["After a review by @cleveroze it appears in the Workshop for everyone. You need a free GitHub account.", ...warnings].join("\n"),
+      buttons: [
+        { label: "Cancel", value: false },
+        { label: "Continue on GitHub", value: true, primary: true },
+      ],
+      cancelValue: false,
+    });
+    if (!go) return;
+    const { url, prefilled, json } = submissionUrl(bundle);
+    if (!prefilled) {
+      await navigator.clipboard.writeText(json);
+      notify("info", "Your extension was copied", "It is too big for a link: paste it into the “Extension bundle” field on GitHub.");
+    }
+    await preview.openExternal(url);
+  } catch (e) {
+    reportError("Cannot publish", e);
+  }
+}
 export const getExtensionsDir = () => extensionsDir;

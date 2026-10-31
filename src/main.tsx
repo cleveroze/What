@@ -14,6 +14,7 @@ import { installRipple } from "./lib/ripple";
 import { initProgress } from "./state/progress";
 import { initSecrets } from "./state/secrets";
 import { initExtensions } from "./extensions/host";
+import { initLinks } from "./state/links";
 import { log } from "./state/output";
 import { load } from "./state/persist";
 import "./state/problems";
@@ -66,7 +67,9 @@ async function boot() {
     // Hidden webviews get no animation frames, so use a timer, not rAF.
     setTimeout(() => win.show().then(() => win.setFocus()).catch(() => {}), 40);
     await restoreSession(lastRoot);
-    initExtensions().catch((e) => reportError("Extensions failed to load", e));
+    initExtensions()
+      .catch((e) => reportError("Extensions failed to load", e))
+      .finally(() => initLinks().catch((e) => reportError("Links failed to start", e)));
     log("Stride ready");
   } catch (e) {
     reportError("Startup failed", e);

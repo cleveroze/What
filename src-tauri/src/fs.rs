@@ -402,10 +402,16 @@ pub fn fs_reveal(path: String) -> Result<(), String> {
 /// Paths passed on the command line (e.g. "Open with Stride").
 #[tauri::command]
 pub fn app_launch_paths() -> Vec<String> {
-    std::env::args()
-        .skip(1)
-        .filter(|a| !a.starts_with('-'))
-        .filter_map(|a| fs::canonicalize(&a).ok().map(|p| strip_unc(&p)))
+    let cwd = std::env::current_dir().unwrap_or_default();
+    resolve_launch_args(std::env::args().skip(1), &cwd)
+}
+
+/// Turns command-line arguments into existing absolute paths. Flags and
+/// `stride://` links are skipped (links are handled by the deep-link plugin).
+pub fn resolve_launch_args(args: impl IntoIterator<Item = String>, cwd: &Path) -> Vec<String> {
+    args.into_iter()
+        .filter(|a| !a.starts_with('-') && !a.contains("://"))
+        .filter_map(|a| fs::canonicalize(cwd.join(&a)).ok().map(|p| strip_unc(&p)))
         .collect()
 }
 

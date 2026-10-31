@@ -28,7 +28,9 @@
     ],
     "security": {
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost https: http://localhost:* http://127.0.0.1:*; frame-src http://127.0.0.1:*",
-      "dangerousDisableAssetCspModification": ["style-src"],
+      "dangerousDisableAssetCspModification": [
+        "style-src"
+      ],
       "devCsp": null
     }
   },
@@ -45,8 +47,21 @@
       "icons/icon.ico"
     ],
     "windows": {
-      "webviewInstallMode": { "type": "downloadBootstrapper" },
-      "nsis": { "installMode": "currentUser" }
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "stride"
+        ]
+      }
     }
   }
 }
