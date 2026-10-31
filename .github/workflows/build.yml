@@ -69,11 +69,11 @@ jobs:
           Copy-Item src-tauri/target/release/stride.exe release/Stride-Portable.exe
           if ($env:GITHUB_REF_NAME -eq "fix/ai-assistant-text-overlap") {
             $fixNotes = "Stride AI Assistant text overlap fix for Windows 10/11.`n`n" +
-              "Fixes Markdown wrapping, narrow sidebar overflow, long words, inline code and code-block scrolling.`n`n" +
+              "Fixes Expressive shape alignment in the activity bar and retains AI text wrapping fixes.`n`n" +
               "This is an isolated build, separate from the standard latest release.`n`n" +
               "Built from commit $env:GITHUB_SHA."
-            gh release create stride-ai-fix-v2 release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe `
-              --title "Stride AI Assistant Fix (preview)" --notes $fixNotes --target $env:GITHUB_SHA --prerelease
+            gh release create stride-ai-fix-v3 release/Stride-Setup.exe release/Stride.msi release/Stride-Portable.exe `
+              --title "Stride UI Alignment Fix v3 (preview)" --notes $fixNotes --target $env:GITHUB_SHA --prerelease
             exit $LASTEXITCODE
           }
           # Replace the rolling "latest build" release with this build.
