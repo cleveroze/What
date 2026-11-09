@@ -1,0 +1,53 @@
+{
+  "id": "site-starters",
+  "name": "Site Starters",
+  "version": "1.0.0",
+  "description": "Five ready-to-edit HTML website starters: portfolio, landing page, agency, dashboard and blog.",
+  "author": "milvet",
+  "icon": "code",
+  "categories": [
+    "Snippets",
+    "Tools"
+  ],
+  "main": "main.js",
+  "contributes": {
+    "commands": [
+      {
+        "id": "insert-starter",
+        "title": "Insert website starter"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "html",
+        "prefix": "site-portfolio",
+        "description": "Personal portfolio website",
+        "body": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Alex Morgan — Portfolio</title>\n  <style>\n    *{box-sizing:border-box}body{margin:0;background:#f5f4f0;color:#20211f;font:16px/1.6 Inter,Arial,sans-serif}main{max-width:980px;margin:auto;padding:9vh 7vw}nav{display:flex;justify-content:space-between}a{color:inherit;text-decoration:none}.eyebrow{color:#777;font-size:12px;letter-spacing:.14em;text-transform:uppercase}h1{font-size:clamp(48px,9vw,100px);line-height:.98;letter-spacing:-.07em;margin:70px 0 24px}.intro{max-width:520px;color:#666;font-size:19px}.work{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:64px}.project{min-height:210px;background:#e5e2da;border-radius:18px;padding:24px;display:flex;align-items:end;font-size:22px}@media(max-width:600px){.work{grid-template-columns:1fr}main{padding:32px 22px}}\n  </style>\n</head>\n<body><main><nav><strong>AM.</strong><a href=\"mailto:hello@example.com\">Get in touch ↗</a></nav><p class=\"eyebrow\">Designer · Developer</p><h1>Making digital<br>feel human.</h1><p class=\"intro\">I’m Alex, an independent designer creating thoughtful identities and digital experiences.</p><section class=\"work\"><a class=\"project\" href=\"#\">01 — Brand identity</a><a class=\"project\" href=\"#\">02 — Digital product</a><a class=\"project\" href=\"#\">03 — Art direction</a><a class=\"project\" href=\"#\">04 — Experiments</a></section></main></body>\n</html>"
+      },
+      {
+        "language": "html",
+        "prefix": "site-landing",
+        "description": "Product landing page",
+        "body": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>North — Focus, clearly</title><style>*{box-sizing:border-box}body{margin:0;background:#f7f8f6;color:#202520;font:16px/1.5 Inter,Arial,sans-serif}header,main{max-width:1100px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center}.btn{display:inline-block;background:#253b30;color:white;padding:13px 20px;border-radius:999px;text-decoration:none}.hero{text-align:center;padding:110px 20px 90px}h1{font-size:clamp(48px,8vw,88px);line-height:1;letter-spacing:-.065em;max-width:850px;margin:18px auto}.muted{color:#727a73}.hero p{max-width:520px;margin:24px auto 30px;font-size:19px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding-bottom:70px}.feature{background:#ecefea;padding:26px;border-radius:18px;min-height:150px}@media(max-width:650px){.features{grid-template-columns:1fr}.hero{padding:75px 10px}}</style></head><body><header><strong>NORTH</strong><a class=\"btn\" href=\"#start\">Get started</a></header><main><section class=\"hero\"><span class=\"muted\">A calmer way to work</span><h1>Make room for your best work.</h1><p class=\"muted\">A simple workspace that helps your team focus on what matters and move forward together.</p><a class=\"btn\" id=\"start\" href=\"mailto:hello@example.com\">Try it today ↗</a></section><section class=\"features\"><article class=\"feature\"><h3>Stay focused</h3><p class=\"muted\">Keep priorities clear and distractions out of the way.</p></article><article class=\"feature\"><h3>Move together</h3><p class=\"muted\">Bring your team and ideas into one shared space.</p></article><article class=\"feature\"><h3>See progress</h3><p class=\"muted\">Know what is happening without another meeting.</p></article></section></main></body></html>"
+      },
+      {
+        "language": "html",
+        "prefix": "site-agency",
+        "description": "Creative agency website",
+        "body": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Form & Field — Studio</title><style>*{box-sizing:border-box}body{margin:0;background:#171916;color:#f3f1e9;font:16px/1.5 Arial,sans-serif}header{padding:26px 5vw;display:flex;justify-content:space-between;border-bottom:1px solid #444}main{padding:10vh 8vw}small{color:#b8c4ad;letter-spacing:.16em;text-transform:uppercase}h1{font-size:clamp(54px,10vw,120px);line-height:.9;letter-spacing:-.07em;max-width:900px;margin:32px 0}p{color:#b6b9b1;max-width:520px;font-size:19px}.services{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:100px;border-top:1px solid #555;padding-top:24px}.services h3{font-weight:500}@media(max-width:650px){.services{grid-template-columns:1fr}main{padding:70px 24px}}</style></head><body><header><strong>FORM & FIELD</strong><a href=\"mailto:hello@example.com\" style=\"color:inherit\">Start a project ↗</a></header><main><small>Independent creative studio · Est. 2018</small><h1>Ideas into<br>identity.</h1><p>We build clear brands and digital experiences for people moving their industries forward.</p><section class=\"services\"><article><small>01</small><h3>Brand strategy</h3><p>Positioning, naming and direction.</p></article><article><small>02</small><h3>Digital design</h3><p>Websites and product experiences.</p></article><article><small>03</small><h3>Development</h3><p>Thoughtful, reliable implementation.</p></article></section></main></body></html>"
+      },
+      {
+        "language": "html",
+        "prefix": "site-dashboard",
+        "description": "Analytics dashboard layout",
+        "body": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Overview — Dashboard</title><style>*{box-sizing:border-box}body{margin:0;background:#f4f5f3;color:#252824;font:14px/1.5 Inter,Arial,sans-serif}.shell{display:grid;grid-template-columns:210px 1fr;min-height:100vh}aside{background:#fff;padding:28px 20px;border-right:1px solid #e7e9e5}aside strong{display:block;margin-bottom:45px}aside a{display:block;padding:11px;color:#697068;text-decoration:none;border-radius:9px}aside a:first-of-type{background:#edf1ec;color:#273a2b}main{padding:36px;max-width:1200px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center}.muted{color:#7c827b}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0}.card{background:white;border:1px solid #e8eae6;border-radius:14px;padding:20px}.value{font-size:30px;font-weight:600;margin-top:10px}.chart{height:210px;display:flex;align-items:end;gap:10px;padding:20px 0}.bar{flex:1;background:#aab9a8;border-radius:6px 6px 0 0}.bar:nth-child(2n){background:#647b68}@media(max-width:700px){.shell{grid-template-columns:1fr}aside{display:none}main{padding:22px}.grid{grid-template-columns:1fr}}</style></head><body><div class=\"shell\"><aside><strong>STUDIO / DATA</strong><a href=\"#\">Overview</a><a href=\"#\">Analytics</a><a href=\"#\">Projects</a><a href=\"#\">Settings</a></aside><main><div class=\"top\"><div><span class=\"muted\">Workspace / Overview</span><h1>Good morning, Alex</h1></div><span class=\"muted\">Last 30 days</span></div><section class=\"grid\"><article class=\"card\"><span class=\"muted\">Visitors</span><div class=\"value\">24,892</div><span>↑ 12.8% this month</span></article><article class=\"card\"><span class=\"muted\">Conversions</span><div class=\"value\">1,284</div><span>↑ 4.2% this month</span></article><article class=\"card\"><span class=\"muted\">Revenue</span><div class=\"value\">€8,420</div><span>↑ 8.1% this month</span></article></section><section class=\"card\"><strong>Traffic overview</strong><div class=\"chart\"><i class=\"bar\" style=\"height:35%\"></i><i class=\"bar\" style=\"height:60%\"></i><i class=\"bar\" style=\"height:48%\"></i><i class=\"bar\" style=\"height:82%\"></i><i class=\"bar\" style=\"height:67%\"></i><i class=\"bar\" style=\"height:92%\"></i><i class=\"bar\" style=\"height:73%\"></i><i class=\"bar\" style=\"height:100%\"></i></div></section></main></div></body></html>"
+      },
+      {
+        "language": "html",
+        "prefix": "site-blog",
+        "description": "Editorial blog homepage",
+        "body": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Margin — Journal</title><style>*{box-sizing:border-box}body{margin:0;background:#faf9f6;color:#262521;font:16px/1.6 Georgia,serif}header{padding:24px 6vw;border-bottom:1px solid #dedbd4;display:flex;justify-content:space-between}main{max-width:1000px;margin:auto;padding:65px 28px}.kicker{font:12px Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#8a857c}h1{font-size:clamp(48px,8vw,82px);line-height:1;letter-spacing:-.055em;max-width:700px;margin:18px 0}.lead{font-size:21px;color:#777166;max-width:600px}.stories{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;margin-top:65px}.story{border-top:1px solid #d8d4cc;padding-top:18px}.story h2{font-size:28px;line-height:1.15;font-weight:500}.story p{color:#777166}@media(max-width:650px){.stories{grid-template-columns:1fr}}</style></head><body><header><strong>MARGIN — JOURNAL</strong><span class=\"kicker\">Ideas for everyday life</span></header><main><span class=\"kicker\">The latest issue · No. 08</span><h1>Notes on living and making.</h1><p class=\"lead\">A journal about thoughtful work, culture, design and the small things that shape our days.</p><section class=\"stories\"><article class=\"story\"><span class=\"kicker\">Design · 6 min read</span><h2>Why the best interfaces know when to be quiet</h2><p>Good design is not always about adding more. Sometimes it is about making space.</p><a href=\"#\">Read story →</a></article><article class=\"story\"><span class=\"kicker\">Culture · 4 min read</span><h2>A slower approach to creative work</h2><p>Finding a rhythm that leaves room for better ideas.</p><a href=\"#\">Read story →</a></article></section></main></body></html>"
+      }
+    ]
+  }
+}
