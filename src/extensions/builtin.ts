@@ -2,7 +2,7 @@
  * sources the Workshop publishes), so they double as documentation. */
 import type { ExtensionManifest, InstalledExtension } from "./types";
 
-export const BUILTIN_IDS = ["word-count", "case-converter", "sakura-theme", "html-snippets", "ai-commenter"];
+export const BUILTIN_IDS = ["word-count", "case-converter", "sakura-theme", "html-snippets", "ai-commenter", "site-starters"];
 
 const manifests = import.meta.glob<ExtensionManifest>("/extensions/*/extension.json", { eager: true, import: "default" });
 const sources = import.meta.glob<string>("/extensions/*/*.js", { eager: true, query: "?raw", import: "default" });
